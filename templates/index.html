@@ -19,38 +19,18 @@
             }
         </style>
 	</head>
-    <body>
+    <body class="bg-slate-100">
         <header>
             <h1 class="font-bold text-2xl my-16">Feedback Central</h1>
             <p>Please provide Feedback for ...</p>
         </header>
-        <section id="task-list">
-        {{ block "Tasks" . }}
-        {{ range . }}
-            <div id="{{ .ID }}" class="grid gird-cols-10 gap-2">
-                <div class="text-lg col-start-2 col-span-2">
-                    <form hx-post="/tasks/{{ .ID }}/score" hx-swap="innerhtml" hx-target="next .q-score">
-                        <input type="hidden" name="scorekeeper" value="inc">
-                        <button type="submit" class="w-12 rounded-full bg-amber-50 focus:bg-lime-700">
-                            &#128897;
-                        </button>
-                    </form>
-                    <p class="q-score">{{ .Score }}</p>
-                    <form hx-post="/tasks/{{ .ID }}/score" hx-swap="innerhtml" hx-target="previous .q-score">
-                        <input type="hidden" name="scorekeeper" value="dec">
-                        <button type="submit" class="w-12 rounded-full bg-amber-50 focus:bg-red-800">
-                            &#128899;
-                        </button>
-                    </form>
-                </div>
-                <div class="col-start-4 col-end-9">
-                    <h2 class="text-xl">{{ .Title }}</h2>
-                    <p class="text-base">{{ .Body }}</p>
-                </div>
-            </div>
-            <hr>
-        {{ end }}
-        {{ end }}
+        <section id="main" class="grid grid-cols-3 gap-4">
+            {{ template "createForm" .}}
+            <section id="task-list" class="col-span-2">
+            {{ range . }}
+            {{ template "task" . }}
+            {{ end }}
+            </section>
         </section>
         {{ template "footer" .}}
     </body>

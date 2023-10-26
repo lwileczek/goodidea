@@ -1,0 +1,24 @@
+{{ define "task" }}
+<div id="{{ .ID }}" class="grid gird-cols-8 gap-2">
+    <div class="text-lg">
+        <form hx-post="/tasks/{{ .ID }}/score" hx-swap="innerhtml" hx-target="next .q-score">
+            <input type="hidden" name="scorekeeper" value="inc">
+            <button type="submit" class="w-12 rounded-full bg-amber-50 focus:bg-lime-700">
+                &#128897;
+            </button>
+        </form>
+        <p class="q-score">{{ .Score }}</p>
+        <form hx-post="/tasks/{{ .ID }}/score" hx-swap="innerhtml" hx-target="previous .q-score">
+            <input type="hidden" name="scorekeeper" value="dec">
+            <button type="submit" class="w-12 rounded-full bg-amber-50 focus:bg-red-800">
+                &#128899;
+            </button>
+        </form>
+    </div>
+    <div class="col-start-2 col-end-7">
+        <h2 class="text-xl">{{ .Title }}</h2>
+        <p class="text-base">{{ .Body }}</p>
+    </div>
+</div>
+<hr>
+{{ end }}
