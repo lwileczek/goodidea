@@ -16,9 +16,9 @@
         </form>
     </div>
     <div class="col-start-2 col-end-7">
-        <h2 class="text-xl">{{ .Title }}</h2>
+        <a href="/tasks/{{ .ID }}"><h2 class="text-xl">{{ .Title }}</h2></a>
         <p class="text-base">{{ .Body }}</p>
     </div>
 </div>
 <hr>
-{{ end }}
+{{- end -}}

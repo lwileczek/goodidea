@@ -18,11 +18,23 @@ type Task struct {
 	CompletedAt *time.Time `json:"completedAt"`
 	CreatedAt   time.Time  `json:"createdAt"`
 	DeletedAt   time.Time  `json:"deletedAt"`
+	Comments    []Comment  `json:"comments"`
 }
 
 func getAllTasks() ([]Task, error) {
 	ctx := context.Background()
-	query := "SELECT id, status, title, body, score, completed_at, created_at FROM tasks WHERE deleted_at IS NULL ORDER BY score DESC"
+	query := `SELECT
+	id,
+	title,
+	-- Don't return the entire body, this is for a summary page
+	SUBSTRING(body, 1, 64) AS body,
+	score
+FROM
+	tasks
+WHERE
+	deleted_at IS NULL
+ORDER BY
+	score DESC`
 
 	tasks := make([]Task, 0, 8)
 	rows, err := db.Query(ctx, query)
@@ -37,12 +49,9 @@ func getAllTasks() ([]Task, error) {
 		var task Task
 		err = rows.Scan(
 			&task.ID,
-			&task.Status,
 			&task.Title,
 			&task.Body,
 			&task.Score,
-			&task.CompletedAt,
-			&task.CreatedAt,
 		)
 		if err != nil {
 			log.Println("Unable to marshal DB response into struct")
@@ -54,12 +63,35 @@ func getAllTasks() ([]Task, error) {
 	return tasks, nil
 }
 
-func addTask(title, details string) error {
+func getTasksByID(id uint32) (Task, error) {
 	ctx := context.Background()
-	query := "INSERT INTO tasks(title, body) VALUES($1, $2)"
+	query := "SELECT id, status, title, body, score, completed_at, created_at FROM tasks WHERE id = $1 and deleted_at IS NULL"
 
-	_, err := db.Exec(ctx, query, title, details)
-	return err
+	var task Task
+	if err := db.QueryRow(ctx, query, id).Scan(
+		&task.ID,
+		&task.Status,
+		&task.Title,
+		&task.Body,
+		&task.Score,
+		&task.CompletedAt,
+		&task.CreatedAt,
+	); err != nil {
+		Logr.Error("Could not query task from DB", "err", err)
+		return task, err
+	}
+	return task, nil
+}
+
+func addTask(title, details string) (uint32, error) {
+	ctx := context.Background()
+	query := "INSERT INTO tasks(title, body) VALUES($1, $2) RETURNING id"
+
+	var newID uint32
+	if err := db.QueryRow(ctx, query, title, details).Scan(&newID); err != nil {
+		return 0, err
+	}
+	return newID, nil
 }
 
 func updateTaskScore(id uint32, inc bool) (int32, error) {

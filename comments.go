@@ -24,7 +24,7 @@ type Comment struct {
 func getAllTaskComments(taskID uint32) ([]Comment, error) {
 	ctx := context.Background()
 	query := `SELECT
-		user,
+		username,
 		content,
 		created_at
 	FROM 
@@ -60,7 +60,7 @@ func getAllTaskComments(taskID uint32) ([]Comment, error) {
 
 func addComment(t uint32, u *string, c string) error {
 	ctx := context.Background()
-	query := "INSERT INTO comments(task_id, user, comment) VALUES($1, $2, $3)"
+	query := "INSERT INTO comments(task_id, username, comment) VALUES($1, $2, $3)"
 
 	_, err := db.Exec(ctx, query, t, u, c)
 	return err

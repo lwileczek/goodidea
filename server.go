@@ -10,19 +10,16 @@ import (
 )
 
 func index(w http.ResponseWriter, r *http.Request) {
-
 	tsks, err := getAllTasks()
 	if err != nil {
 		fmt.Println("Could not get all tasks from db", err)
 	}
 
-	tmpl := template.Must(template.ParseFiles("templates/index.html", "templates/task.html", "templates/footer.html", "templates/create.html"))
-
-	err = tmpl.Execute(w, tsks)
+	tmpl := template.Must(template.ParseGlob("templates/*.html"))
+	err = tmpl.ExecuteTemplate(w, "index.html", tsks)
 	if err != nil {
 		fmt.Println("Could not execute template", err)
 	}
-
 }
 
 func updateScore(w http.ResponseWriter, r *http.Request) {
@@ -44,6 +41,8 @@ func updateScore(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, fmt.Sprintf("%d", score))
 }
 
+//createTask - recieve a title and body and create a new task in the DB with default values
+//return an HTML block of the Task summarized to be displayed on landing page
 func createTask(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
@@ -52,12 +51,20 @@ func createTask(w http.ResponseWriter, r *http.Request) {
 
 	title := r.FormValue("title")
 	body := r.FormValue("details")
-	err = addTask(title, body)
+	taskID, err := addTask(title, body)
 	if err != nil {
-		fmt.Println("Could not update task score", err)
+		Logr.Error("Could not create a new task", "error", err)
+		fmt.Fprintf(w, "<p>Could not create a new task</p>")
+		return
+	}
+
+	//On the summary page, don't show an entire task description which may be long
+	if len(body) > 64 {
+		body = body[:64]
 	}
 
 	task := Task{
+		ID:    taskID,
 		Title: title,
 		Body:  &body,
 		Score: 0,
@@ -70,10 +77,39 @@ func createTask(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func viewTask(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.ParseUint(mux.Vars(r)["id"], 10, 64)
+	if err != nil {
+		fmt.Println("Could not parse id", err)
+		fmt.Fprintf(w, "ERROR! Could not get task ID from request")
+		return
+	}
+	tsk, err := getTasksByID(uint32(id))
+	if err != nil {
+		Logr.Error("could not get task by id", "taskID", id, "error", err)
+		fmt.Fprintf(w, "Error could not get a task with this ID")
+		return
+	}
+
+	comments, err := getAllTaskComments(uint32(id))
+	if err != nil {
+		Logr.Error("could not get comments for task", "taskID", id, "error", err)
+	}
+
+	tsk.Comments = comments
+
+	tmpl := template.Must(template.ParseFiles("templates/show-task.html", "templates/header.html", "templates/meta.html", "templates/footer.html"))
+	err = tmpl.Execute(w, tsk)
+	if err != nil {
+		Logr.Error("could not render template for task", "taskID", id, "error", err)
+	}
+}
+
 func NewServer() *mux.Router {
 	mux := mux.NewRouter()
 	mux.HandleFunc("/", index)
 	mux.HandleFunc("/tasks/{id}/score", updateScore).Methods("POST")
+	mux.HandleFunc("/tasks/{id}", viewTask).Methods("GET")
 	mux.HandleFunc("/tasks", createTask).Methods("POST")
 
 	return mux

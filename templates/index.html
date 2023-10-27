@@ -1,29 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-        <meta charset="UTF-8">
-        <meta name="description" content="Make feature requests and upvote the ones you want done first!">
-        <meta name="keywords" content="tasks,upvote,management">
-        <meta name="author" content="someone">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script src="https://unpkg.com/htmx.org@1.9.6"></script>
-
-		<title>Task Manager</title>
-        <style>
-            html, body {
-                height: 100%;
-                font-family: proxima-nova, "Helvetica Neue", Arial, sans-serif;;
-            }
-        </style>
-	</head>
+    {{ template "meta" .}}
     <body class="bg-slate-100">
-        <header class="bg-sky-900 w-full h-16 mb-5">
-            <h1 class="font-bold text-2xl text-slate-50">Feedback Central</h1>
-        </header>
+        {{ template "header" }}
         <section id="main" class="grid grid-cols-3 gap-4">
             {{ template "createForm" .}}
             <section id="task-list" class="col-span-2">

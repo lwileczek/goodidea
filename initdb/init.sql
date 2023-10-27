@@ -27,16 +27,19 @@ INSERT INTO tasks(title, body)
 
 CREATE TABLE comments (
     -- The unique record ID
-    id           BIGSERIAL not null PRIMARY KEY,
+    id           BIGSERIAL NOT NULL PRIMARY KEY,
     -- All comments are "on" a task so relate back to the specific task
     task_id      INTEGER NOT NULL,
-    FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
     -- Optionally, users can leave a name if they choose
-    user         string(48),
+    username     VARCHAR(48),
     --The body of the comment
     content      TEXT,
     -- When the task was created
     created_at   TIMESTAMP without time zone DEFAULT NOW(),
+    -- Apply Foreign Key
+    CONSTRAINT fk_task
+        FOREIGN KEY (task_id)
+            REFERENCES tasks(id) ON DELETE CASCADE
 );
 
 -- Index our comments table on task ID since this will be used to join almost every time it's read
