@@ -22,7 +22,7 @@ type Task struct {
 
 func getAllTasks() ([]Task, error) {
 	ctx := context.Background()
-	query := "SELECT id, status, title, body, score, completed_at, created_at FROM tasks WHERE deleted_at IS NULL"
+	query := "SELECT id, status, title, body, score, completed_at, created_at FROM tasks WHERE deleted_at IS NULL ORDER BY score DESC"
 
 	tasks := make([]Task, 0, 8)
 	rows, err := db.Query(ctx, query)
