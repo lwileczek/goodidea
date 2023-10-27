@@ -16,13 +16,13 @@
         <style>
             html, body {
                 height: 100%;
+                font-family: proxima-nova, "Helvetica Neue", Arial, sans-serif;;
             }
         </style>
 	</head>
     <body class="bg-slate-100">
-        <header>
-            <h1 class="font-bold text-2xl my-16">Feedback Central</h1>
-            <p>Please provide Feedback for ...</p>
+        <header class="bg-indigo-900 w-full h-16 mb-5">
+            <h1 class="font-bold text-2xl text-slate-50">Feedback Central</h1>
         </header>
         <section id="main" class="grid grid-cols-3 gap-4">
             {{ template "createForm" .}}

@@ -2,7 +2,7 @@
 
 sudo docker run \
     -v $(dirname $PWD)/initdb:/docker-entrypoint-initdb.d \
-    --publish 5432:5432 \
+    --publish 5555:5432 \
     --detach \
     --name=pg \
     --env POSTGRES_USER=cody \
