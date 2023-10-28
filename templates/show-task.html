@@ -14,18 +14,15 @@
             </div>
             <section id="comment-container" class="col-start-2 col-span-4">
                 <form hx-post="/tasks/{{ .ID }}/comments" hx-swap="beforeend" hx-target="#comments" hx-on::after-request="this.reset()" class="bg-white editor mx-auto w-10/12 flex flex-col text-gray-800 border border-gray-300 p-4 shadow-lg max-w-2xl">
-                    <input class="title bg-gray-100 border border-gray-300 p-2 mb-4 outline-none" spellcheck="false" placeholder="Username (optional)" type="text" name="user">
-                    <textarea class="description bg-gray-100 sec p-3 h-60 border border-gray-300 outline-none" spellcheck="false" name="comment" placeholder="Write a comment or question here..."></textarea>
+                    <input class="title bg-gray-100 border border-gray-300 p-2 mb-4 outline-none" spellcheck="false" placeholder="Username (optional)" type="text" name="username">
+                    <textarea class="description bg-gray-100 sec p-3 h-60 border border-gray-300 outline-none" spellcheck="false" name="comments" placeholder="Write a comment or question here..."></textarea>
                     
-                    <button type="submit" class="btn border border-sky-300 p-1 px-4 font-semibold cursor-pointer text-slate-50 ml-2 bg-sky-300 hover:bg-sky-500/75">Post</button>
+                    <button hx-on::after-request="this.reset()" class="btn border w-24 border-slate-300 cursor-pointer text-white ml-2 bg-gray-300 hover:bg-gray-500/75">Cancel</button>
+                    <button type="submit" class="w-24 btn border border-sky-300 cursor-pointer text-slate-50 ml-2 bg-sky-300 hover:bg-sky-500/75">Post</button>
                 </form>
-                <div id="comments">
+                <div id="comments" class="bg-white">
                     {{ range .Comments }}
-                    <div class="border-1 border-slate-200 h-min-40">
-                        <p>{{ .Content }}</p>
-                        {{ if .User }}<p>From <em>{{ .User }}</em></p>{{- end -}}
-                        <p>Posted: {{ .CreatedAt }}</p>
-                    </div>
+                        {{ template "comment" . }}
                     {{- end -}}
                 </div>
             </section>

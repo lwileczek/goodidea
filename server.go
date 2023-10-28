@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -98,18 +99,52 @@ func viewTask(w http.ResponseWriter, r *http.Request) {
 
 	tsk.Comments = comments
 
-	tmpl := template.Must(template.ParseFiles("templates/show-task.html", "templates/header.html", "templates/meta.html", "templates/footer.html"))
+	tmpl := template.Must(template.ParseFiles("templates/show-task.html", "templates/header.html", "templates/meta.html", "templates/footer.html", "templates/comment.html"))
 	err = tmpl.Execute(w, tsk)
 	if err != nil {
 		Logr.Error("could not render template for task", "taskID", id, "error", err)
 	}
 }
 
+func postComment(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.ParseUint(mux.Vars(r)["id"], 10, 64)
+	if err != nil {
+		Logr.Error("Could not parse id", "error", err)
+		fmt.Fprintf(w, "ERROR! Could not get task ID from request")
+		return
+	}
+
+	err = r.ParseForm()
+	if err != nil {
+		Logr.Error("Error parsing form", "error", err)
+		fmt.Fprintf(w, "<p>ERROR! Could not pase the form data</p>")
+		return
+	}
+
+	var username string = r.FormValue("username")
+	//if r.FormValue("username") != "" {
+	//	*username = r.FormValue("username")
+	//}
+
+	if err := addComment(uint32(id), &username, r.FormValue("comments")); err != nil {
+		Logr.Error("Could not save a new comment", "error", err)
+		fmt.Fprintf(w, "<p>ERROR! could not insert the comment into the DB</p>")
+		return
+	}
+
+	tmpl := template.Must(template.ParseFiles("templates/make-comment.html", "templates/comment.html"))
+	err = tmpl.Execute(w, Comment{TaskID: uint32(id), User: &username, Content: r.FormValue("comments"), CreatedAt: time.Now()})
+	if err != nil {
+		Logr.Error("could not render template for new comment", "error", err)
+	}
+}
+
 func NewServer() *mux.Router {
 	mux := mux.NewRouter()
 	mux.HandleFunc("/", index)
-	mux.HandleFunc("/tasks/{id}/score", updateScore).Methods("POST")
 	mux.HandleFunc("/tasks/{id}", viewTask).Methods("GET")
+	mux.HandleFunc("/tasks/{id}/score", updateScore).Methods("POST")
+	mux.HandleFunc("/tasks/{id}/comments", postComment).Methods("POST")
 	mux.HandleFunc("/tasks", createTask).Methods("POST")
 
 	return mux

@@ -1,0 +1,7 @@
+{{ define "comment" }}
+<div class="relative rounded-lg border-1 border-slate-200 h-[10vh] h-max-64 h-min-40 bg-slate-100 ">
+    <p>{{ .Content }}</p>
+    {{ if .User }}<p class="absolute bottom-0 left-0">From <em>{{ .User }}</em></p>{{- end -}}
+    <p class="absolute bottom-0 right-0">Posted: {{ .CreatedAt }}</p>
+</div>
+{{- end -}}
