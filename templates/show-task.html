@@ -5,28 +5,48 @@
         {{ template "header" }}
         <div class="grid grid-cols-6 gap-4">
             <div class="col-start-2 col-span-4">
-                <h1>{{ .Title }}</h1>
-                <p><span>Requested: {{ .CreatedAt -}}</span><span>Status: {{ if .Status }}Completed{{ else }}Incomplete{{end -}}</span></p>
+                <h1 class="fontsemi-bold text-2xl mb-5">{{ .Title }}</h1>
+                <div class="text-sm grid gird-cols-10">
+                    <p class="col-start-1">Requested: {{ .CreatedAt.Format "2006 Jan 02" -}}</p>
+                    <p class="col-start-10">Status: {{ if .Status }}Completed{{ else }}Incomplete{{end -}}</p>
+                </div>
                 <hr>
             </div>
-            <div class="col-start-2 col-span-4">
+            <div class="text-lg col-start-2 col-span-4 mb-10">
                 <p>{{ .Body }}</p>
             </div>
             <section id="comment-container" class="col-start-2 col-span-4">
-                <form hx-post="/tasks/{{ .ID }}/comments" hx-swap="beforeend" hx-target="#comments" hx-on::after-request="this.reset()" class="bg-white editor mx-auto w-10/12 flex flex-col text-gray-800 border border-gray-300 p-4 shadow-lg max-w-2xl">
-                    <input class="title bg-gray-100 border border-gray-300 p-2 mb-4 outline-none" spellcheck="false" placeholder="Username (optional)" type="text" name="username">
-                    <textarea class="description bg-gray-100 sec p-3 h-60 border border-gray-300 outline-none" spellcheck="false" name="comments" placeholder="Write a comment or question here..."></textarea>
-                    
-                    <button hx-on::after-request="this.reset()" class="btn border w-24 border-slate-300 cursor-pointer text-white ml-2 bg-gray-300 hover:bg-gray-500/75">Cancel</button>
-                    <button type="submit" class="w-24 btn border border-sky-300 cursor-pointer text-slate-50 ml-2 bg-sky-300 hover:bg-sky-500/75">Post</button>
-                </form>
-                <div id="comments" class="bg-white">
+                <div class="grid grid-cols-10">
+                    <h2 class="col-start-1 text-xl bold">Discussion</h2>
+                    <a href="#comment-container" onclick="showForm();" class="col-start-10 leading-7">
+                        <em class="text-xs text-sky-800">Add Comment</em>
+                    </a>
+                </div>
+                <section id="comments">
                     {{ range .Comments }}
                         {{ template "comment" . }}
                     {{- end -}}
-                </div>
+                </section>
+                <form id="commentForm"
+                    hx-post="/tasks/{{ .ID }}/comments"
+                    hx-swap="beforeend"
+                    hx-target="#comments"
+                    hx-on::after-request="this.reset()"
+                    class="bg-white mx-auto w-10/12 hidden flex-col border border-gray-300 p-4 shadow-lg max-w-2xl"
+                    >
+                    <input class="title bg-gray-100 border border-gray-300 p-2 mb-4 outline-none" spellcheck="false" placeholder="Username (optional)" type="text" name="username">
+                    <textarea class="description bg-gray-100 sec p-3 h-60 border border-gray-300 outline-none" spellcheck="false" name="comments" placeholder="Write a comment or question here..."></textarea>
+                    
+                    <div class="w-full mt-5 inline-block">
+                        <button type="reset"  class="w-24 btn border cursor-pointer ml-2 border-slate-300 text-white bg-gray-300 hover:bg-gray-500/75">Cancel</button>
+                        <button type="submit" class="w-24 btn border cursor-pointer ml-2 border-sky-300 text-slate-50 bg-sky-300 hover:bg-sky-500/75">Post</button>
+                    </div>
+                </form>
             </section>
         </div>
         {{ template "footer" }}
+        <script>
+            function showForm() {var x=document.getElementById("commentForm");if(x.style.display==="none"){x.style.display="flex";}else{x.style.display="none";}}
+        </script>
     </body>
 </html>

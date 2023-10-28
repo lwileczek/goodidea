@@ -27,7 +27,7 @@ func getAllTasks() ([]Task, error) {
 	id,
 	title,
 	-- Don't return the entire body, this is for a summary page
-	SUBSTRING(body, 1, 64) AS body,
+	SUBSTRING(body, 1, 256) AS body,
 	score
 FROM
 	tasks

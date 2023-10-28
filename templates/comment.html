@@ -1,7 +1,11 @@
 {{ define "comment" }}
-<div class="relative rounded-lg border-1 border-slate-200 h-[10vh] h-max-64 h-min-40 bg-slate-100 ">
+<div class="mb-3 p-5 rounded-lg border-2 border-slate-200 h-[8vh] h-max-64 h-min-20 bg-white text-black">
+    <!-- &#183; -->
+    <p>
+        <em>{{ if .User }}{{ .User }}{{ else }}Unknown{{- end -}}</em>
+        &nbsp;&centerdot;&nbsp;
+        {{ .CreatedAt.Format "2006 Jan 02" }}
+    </p>
     <p>{{ .Content }}</p>
-    {{ if .User }}<p class="absolute bottom-0 left-0">From <em>{{ .User }}</em></p>{{- end -}}
-    <p class="absolute bottom-0 right-0">Posted: {{ .CreatedAt }}</p>
 </div>
 {{- end -}}

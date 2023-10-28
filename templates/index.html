@@ -6,6 +6,7 @@
         <section id="main" class="grid grid-cols-3 gap-4">
             {{ template "createForm" .}}
             <section id="task-list" class="col-span-2">
+                <h1 class="text-3xl mb-5">Feedback Requests</h1>
             {{ range . }}
             {{ template "task" . }}
             {{ end }}
