@@ -1,5 +1,5 @@
 {{ define "task" }}
-<div id="{{ .ID }}" class="grid gird-cols-8 gap-2">
+<div id="{{ .ID }}" class="w-full grid gird-cols-8 gap-2">
     <div class="text-lg">
         <form hx-post="/tasks/{{ .ID }}/score" hx-swap="innerhtml" hx-target="next .q-score">
             <input type="hidden" name="scorekeeper" value="inc">

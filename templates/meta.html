@@ -15,7 +15,23 @@
     <style>
         html, body {
             height: 100%;
-            font-family: proxima-nova, "Helvetica Neue", Arial, sans-serif;;
+            font-family: proxima-nova, "Helvetica Neue", Arial, sans-serif;
+        }
+        .my-indicator{
+            display:none;
+            opacity: 0;
+            border-color: transparent;
+            /* transition: visibility 1s, opacity 1s ease-in;*/
+        }
+        .htmx-request .my-indicator{
+            display:block;
+            border-color: blue;
+            opacity:1;
+        }
+        .htmx-request.my-indicator{
+            display:block;
+            border-color: blue;
+            opacity:1;
         }
     </style>
 </head>

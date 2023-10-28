@@ -3,13 +3,31 @@
     {{ template "meta" .}}
     <body class="bg-slate-100">
         {{ template "header" }}
+        <input
+            type="search"
+            placeholder="Search"
+             maxlength="64"
+            name="title"
+            class="rounded-1 border border-solid border-neutral-300 w-20 h-10 focus:w-48 hover:transition-all focus:border-sky-700"
+            hx-get="/tasks"
+            hx-params="*"
+            hx-indicator="#spinner"
+            hx-target="#task-list"
+            hx-trigger="keyup delay:100ms"
+            ></input>
         <section id="main" class="grid grid-cols-3 gap-4">
             {{ template "createForm" .}}
-            <section id="task-list" class="col-span-2">
+            <section id="task-constainer" class="col-span-2">
                 <h1 class="text-3xl mb-5">Feedback Requests</h1>
-            {{ range . }}
-            {{ template "task" . }}
-            {{ end }}
+                <div id="task-list">
+                    {{ range . }}
+                    {{ template "task" . }}
+                    {{ end }}
+                </div>
+                <div
+                    id="spinner"
+                    class="htmx-indicator h-48 w-48 animate-spin border-white border-t-sky-500 border-[16px] rounded-[50%]"
+                ></div>
             </section>
         </section>
         {{ template "footer" .}}

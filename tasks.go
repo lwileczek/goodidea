@@ -63,6 +63,49 @@ ORDER BY
 	return tasks, nil
 }
 
+func getSomeTasks(clue string) ([]Task, error) {
+	ctx := context.Background()
+	query := `SELECT
+	id,
+	title,
+	-- Don't return the entire body, this is for a summary page
+	SUBSTRING(body, 1, 256) AS body,
+	score
+FROM
+	tasks
+WHERE
+	deleted_at IS NULL AND
+	title ilike '%' || $1 || '%'
+ORDER BY
+	score DESC`
+
+	tasks := make([]Task, 0, 8)
+	rows, err := db.Query(ctx, query, clue)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return tasks, nil
+		}
+		return tasks, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var task Task
+		err = rows.Scan(
+			&task.ID,
+			&task.Title,
+			&task.Body,
+			&task.Score,
+		)
+		if err != nil {
+			log.Println("Unable to marshal DB response into struct")
+			return tasks, err
+		}
+		tasks = append(tasks, task)
+	}
+
+	return tasks, nil
+}
+
 func getTasksByID(id uint32) (Task, error) {
 	ctx := context.Background()
 	query := "SELECT id, status, title, body, score, completed_at, created_at FROM tasks WHERE id = $1 and deleted_at IS NULL"

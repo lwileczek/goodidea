@@ -23,6 +23,28 @@ func index(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func listTasks(w http.ResponseWriter, r *http.Request) {
+	title := r.URL.Query().Get("title")
+
+	var err error
+	var taskList []Task
+	if title == "" {
+		taskList, err = getAllTasks()
+	} else {
+		taskList, err = getSomeTasks(title)
+	}
+	if err != nil {
+		Logr.Error("Could not get tasks from db", err)
+		return
+	}
+
+	tmpl := template.Must(template.ParseFiles("templates/list-tasks.html", "templates/task.html"))
+	err = tmpl.Execute(w, taskList)
+	if err != nil {
+		fmt.Println("Could not execute template", err)
+	}
+}
+
 func updateScore(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseUint(mux.Vars(r)["id"], 10, 64)
 	if err != nil {
@@ -121,19 +143,19 @@ func postComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var username string = r.FormValue("username")
-	//if r.FormValue("username") != "" {
-	//	*username = r.FormValue("username")
-	//}
+	var username *string
+	if r.FormValue("username") != "" {
+		*username = r.FormValue("username")
+	}
 
-	if err := addComment(uint32(id), &username, r.FormValue("comments")); err != nil {
+	if err := addComment(uint32(id), username, r.FormValue("comments")); err != nil {
 		Logr.Error("Could not save a new comment", "error", err)
 		fmt.Fprintf(w, "<p>ERROR! could not insert the comment into the DB</p>")
 		return
 	}
 
 	tmpl := template.Must(template.ParseFiles("templates/make-comment.html", "templates/comment.html"))
-	err = tmpl.Execute(w, Comment{TaskID: uint32(id), User: &username, Content: r.FormValue("comments"), CreatedAt: time.Now()})
+	err = tmpl.Execute(w, Comment{TaskID: uint32(id), User: username, Content: r.FormValue("comments"), CreatedAt: time.Now()})
 	if err != nil {
 		Logr.Error("could not render template for new comment", "error", err)
 	}
@@ -142,10 +164,11 @@ func postComment(w http.ResponseWriter, r *http.Request) {
 func NewServer() *mux.Router {
 	mux := mux.NewRouter()
 	mux.HandleFunc("/", index)
+	mux.HandleFunc("/tasks", listTasks).Methods("GET")
+	mux.HandleFunc("/tasks", createTask).Methods("POST")
 	mux.HandleFunc("/tasks/{id}", viewTask).Methods("GET")
 	mux.HandleFunc("/tasks/{id}/score", updateScore).Methods("POST")
 	mux.HandleFunc("/tasks/{id}/comments", postComment).Methods("POST")
-	mux.HandleFunc("/tasks", createTask).Methods("POST")
 
 	return mux
 }

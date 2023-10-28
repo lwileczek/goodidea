@@ -31,7 +31,7 @@ CREATE TABLE comments (
     -- All comments are "on" a task so relate back to the specific task
     task_id      INTEGER NOT NULL,
     -- Optionally, users can leave a name if they choose
-    username     VARCHAR(48),
+    username     VARCHAR(48) DEFAULT 'Unknown',
     --The body of the comment
     content      TEXT,
     -- When the task was created
