@@ -170,5 +170,8 @@ func NewServer() *mux.Router {
 	mux.HandleFunc("/tasks/{id}/score", updateScore).Methods("POST")
 	mux.HandleFunc("/tasks/{id}/comments", postComment).Methods("POST")
 
+	s := http.StripPrefix("/static/", http.FileServer(http.Dir("./static/")))
+	mux.PathPrefix("/static/").Handler(s)
+
 	return mux
 }

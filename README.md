@@ -9,3 +9,11 @@ Users to **not** need to login or create an account to make a requet or vote
  - The `templates` directory, I think
 
 If there is no pre-built binary then go 1.21+ is required
+
+## Build
+ 1. Minify any JS with esBuild: `npm install && npm run build`
+ 2. Build the binary with Go `go build ./...`
+
+# Status
+> **warning**
+> This project is in _alpha_

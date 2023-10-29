@@ -3,18 +3,20 @@
     {{ template "meta" .}}
     <body class="bg-slate-100">
         {{ template "header" }}
-        <input
-            type="search"
-            placeholder="Search"
-             maxlength="64"
-            name="title"
-            class="rounded-1 border border-solid border-neutral-300 w-20 h-10 focus:w-48 hover:transition-all focus:border-sky-700"
-            hx-get="/tasks"
-            hx-params="*"
-            hx-indicator="#spinner"
-            hx-target="#task-list"
-            hx-trigger="keyup delay:100ms"
-            ></input>
+        <div id="filters" class="grid grid-cols-12">
+            <input
+                type="search"
+                placeholder="Search"
+                maxlength="64"
+                name="title"
+                class="col-start-11 rounded-2 border border-solid border-neutral-300 w-20 h-8 focus:w-48 focus:h-12 focus:mr-4 hover:transition-all focus:border-sky-700"
+                hx-get="/tasks"
+                hx-params="*"
+                hx-indicator="#spinner"
+                hx-target="#task-list"
+                hx-trigger="keyup delay:100ms"
+                ></input>
+        </div>
         <section id="main" class="grid grid-cols-3 gap-4">
             {{ template "createForm" .}}
             <section id="task-constainer" class="col-span-2">
@@ -31,5 +33,6 @@
             </section>
         </section>
         {{ template "footer" .}}
+        <script src="/static/cookies.js"></script>
     </body>
 </html>
