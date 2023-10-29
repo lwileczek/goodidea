@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en-US">
+<html lang="en-US" class="scroll-smooth">
     {{ template "meta" }}
     <body class="bg-slate-50">
         {{ template "header" }}
@@ -18,9 +18,14 @@
             <section id="comment-container" class="col-start-2 col-span-4">
                 <div class="grid grid-cols-10">
                     <h2 class="col-start-1 text-xl bold">Discussion</h2>
-                    <a href="#comment-container" onclick="showForm();" class="col-start-10 leading-7">
-                        <em class="text-xs text-sky-800">Add Comment</em>
-                    </a>
+                    <div class="col-start-9 col-span-2 leading-7 w-full">
+                        <p class="cursor-pointer">
+                            <span onclick="showForm();"><em class="text-xs text-sky-800">Add Comment</em>&nbsp;</span>
+                            <a href="#comment-container" class="flex">
+                                <span class="rotate-90">&#10140;</span>
+                            </a>
+                        </p>
+                    </div>
                 </div>
                 <section id="comments">
                     {{ range .Comments }}
@@ -46,7 +51,7 @@
         </div>
         {{ template "footer" }}
         <script>
-            function showForm(){var x=document.getElementById("commentForm");if(x.style.display==="none"){x.style.display="flex";}else{x.style.display="none";}}
+            function showForm(){var x=document.getElementById("commentForm");console.log(x.style.display);console.log(x.style.display === "none");if(x.style.display==="none"){x.style.display="flex";}else{x.style.display="none";}}
         </script>
     </body>
 </html>

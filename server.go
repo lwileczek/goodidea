@@ -73,6 +73,11 @@ func createTask(w http.ResponseWriter, r *http.Request) {
 	}
 
 	title := r.FormValue("title")
+	if title == "" {
+		fmt.Fprintf(w, "<p>Tasks must have a title.</p>")
+		return
+	}
+
 	body := r.FormValue("details")
 	taskID, err := addTask(title, body)
 	if err != nil {
@@ -143,19 +148,23 @@ func postComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var username *string
-	if r.FormValue("username") != "" {
-		*username = r.FormValue("username")
+	if r.FormValue("comments") == "" {
+		return
+	}
+	var pu *string
+	username := r.FormValue("username")
+	if username != "" {
+		pu = &username
 	}
 
-	if err := addComment(uint32(id), username, r.FormValue("comments")); err != nil {
+	if err := addComment(uint32(id), pu, r.FormValue("comments")); err != nil {
 		Logr.Error("Could not save a new comment", "error", err)
 		fmt.Fprintf(w, "<p>ERROR! could not insert the comment into the DB</p>")
 		return
 	}
 
 	tmpl := template.Must(template.ParseFiles("templates/make-comment.html", "templates/comment.html"))
-	err = tmpl.Execute(w, Comment{TaskID: uint32(id), User: username, Content: r.FormValue("comments"), CreatedAt: time.Now()})
+	err = tmpl.Execute(w, Comment{TaskID: uint32(id), User: pu, Content: r.FormValue("comments"), CreatedAt: time.Now()})
 	if err != nil {
 		Logr.Error("could not render template for new comment", "error", err)
 	}
