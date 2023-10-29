@@ -56,7 +56,7 @@ func updateScore(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error parsing form", err)
 	}
 
-	score, err := updateTaskScore(uint32(id), r.FormValue("scorekeeper") == "inc")
+	score, err := updateTaskScore(uint32(id), r.FormValue(fmt.Sprintf("scorekeeper%d", id)) == "inc")
 	if err != nil {
 		fmt.Println("Could not update task score", err)
 	}

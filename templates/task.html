@@ -1,19 +1,15 @@
 {{ define "task" }}
 <div id="{{ .ID }}" class="w-full grid gird-cols-8 gap-2">
-    <div class="text-lg">
-        <form hx-post="/tasks/{{ .ID }}/score" hx-swap="innerhtml" hx-target="next .q-score">
-            <input type="hidden" name="scorekeeper" value="inc">
-            <button type="submit" class="h-8 w-8 rounded-full flex items-center justify-center bg-amber-50 focus:bg-lime-700">
-                <svg class="h-4" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" style="enable-background:new 0 0 4000 4000" viewBox="0 0 4000 4000"><path d="M2000 0 0 4000h4000z" style="stroke:#000;stroke-miterlimit:10"/></svg>
-            </button>
-        </form>
-        <p class="q-score h-8 w-8 text-center">{{ .Score }}</p>
-        <form hx-post="/tasks/{{ .ID }}/score" hx-swap="innerhtml" hx-target="previous .q-score">
-            <input type="hidden" name="scorekeeper" value="dec">
-            <button type="submit" class="h-8 w-8 rounded-full flex items-center justify-center bg-amber-50 focus:bg-red-800">
-                <svg class="h-4 rotate-180" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" style="enable-background:new 0 0 4000 4000" viewBox="0 0 4000 4000"><path d="M2000 0 0 4000h4000z" style="stroke:#000;stroke-miterlimit:10"/></svg>
-            </button>
-        </form>
+    <div class="text-lg task-score">
+        <input hx-post="/tasks/{{ .ID }}/score" hx-swap="innerhtml" hx-target="#score{{ .ID }}" id="{{ .ID }}-up" name="scorekeeper{{ .ID }}" type=radio value="inc" class="hidden">
+        <label for="{{ .ID }}-up" class="h-8 w-8 rounded-full flex items-center justify-center border-1 border-stone-600 bg-stone-200">
+            <svg class="h-4" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" style="enable-background:new 0 0 4000 4000" viewBox="0 0 4000 4000"><path d="M2000 0 0 4000h4000z" style="stroke:#000;stroke-miterlimit:10"/></svg>
+        </label>
+        <p id="score{{ .ID }}" class="h-8 w-8 text-center">{{ .Score }}</p>
+        <input hx-post="/tasks/{{ .ID }}/score" hx-swap="innerhtml" hx-target="#score{{ .ID }}" id="{{ .ID }}-down" name="scorekeeper{{ .ID }}" type=radio value="dec" class="hidden">
+        <label for="{{ .ID }}-down" class="h-8 w-8 rounded-full flex items-center justify-center border-1 border-stone-600 bg-stone-200">
+            <svg class="h-4 rotate-180" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" style="enable-background:new 0 0 4000 4000" viewBox="0 0 4000 4000"><path d="M2000 0 0 4000h4000z" style="stroke:#000;stroke-miterlimit:10"/></svg>
+        </label>
     </div>
     <div class="col-start-2 col-end-7">
         <a href="/tasks/{{ .ID }}"><h2 class="text-xl">{{ .Title }}</h2></a>
