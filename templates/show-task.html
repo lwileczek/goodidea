@@ -18,14 +18,9 @@
             <section id="comment-container" class="col-start-2 col-span-4">
                 <div class="grid grid-cols-10">
                     <h2 class="col-start-1 text-xl bold">Discussion</h2>
-                    <div class="col-start-9 col-span-2 leading-7 w-full">
-                        <p class="cursor-pointer">
-                            <span onclick="showForm();"><em class="text-xs text-sky-800">Add Comment</em>&nbsp;</span>
-                            <a href="#comment-container" class="flex">
-                                <span class="rotate-90">&#10140;</span>
-                            </a>
-                        </p>
-                    </div>
+                    <a href="#commentForm" class="cursor-pointer col-start-10 leading-7" onclick="showForm();">
+                        <em class="text-xs text-sky-800">Add Comment</em>
+                    </a>
                 </div>
                 <section id="comments">
                     {{ range .Comments }}
@@ -51,7 +46,7 @@
         </div>
         {{ template "footer" }}
         <script>
-            function showForm(){var x=document.getElementById("commentForm");console.log(x.style.display);console.log(x.style.display === "none");if(x.style.display==="none"){x.style.display="flex";}else{x.style.display="none";}}
+            function showForm(){var x=document.getElementById("commentForm");if(x.style.display==="flex"){x.style.display="none";}else{x.style.display="flex";}}
         </script>
     </body>
 </html>
