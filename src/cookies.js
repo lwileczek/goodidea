@@ -22,11 +22,10 @@ const setVoteListeners = () => {
  * @param{number} exdays - how long the cookie should live in days
  */
 const setCookie = (taskId, vote, exdays) => {
-	//document.cookie = "username=John Doe; expires=Thu, 18 Dec 2013 12:00:00 UTC";
 	const d = new Date();
 	d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
-	const expires = `expires=${d.toUTCString()}`;
-    document.cookie = `${taskId}=${vote};${expires};path=/`;
+	const expires = `Expires=${d.toUTCString()}`;
+    document.cookie = `${taskId}=${vote};${expires};path=/; SameSite=Strict; Secure;`;
 };
 
 /**
@@ -51,7 +50,7 @@ const getCookie = (cname) => {
 	return "";
 };
 
-function listAllCookieNames() {
+const listAllCookieNames = () => {
 	const allCookies = document.cookie;
 	const cookieArray = allCookies.split(";");
 	const cookieNames = [];
@@ -61,6 +60,27 @@ function listAllCookieNames() {
 	}
 
 	return cookieNames;
-}
+};
+
+/**
+ * @Fucntion{applyPreviousVotes}
+ * Loop through the cookies from this site and mark any votes that have been
+ * recorded previous to this visit
+ */
+const applyPreviousVotes = () => {
+    const previousVotes = listAllCookieNames();
+    if (previousVotes.length ===0) {
+        return;
+    }
+
+    for (let v=0; v< previousVotes.length; v++) {
+        const radio = document.getElementById(previousVotes[v]);
+        //Could have a cookie for a task not shown
+        if (radio) {
+            radio.checked = true;
+        }
+    }
+};
 
 setVoteListeners();
+applyPreviousVotes();

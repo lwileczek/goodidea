@@ -5,7 +5,7 @@ sudo docker run \
     --publish 5555:5432 \
     --detach \
     --name=pg \
-    --env POSTGRES_USER=cody \
-    --env POSTGRES_PASSWORD=sucks \
+    --env POSTGRES_USER=fairy \
+    --env POSTGRES_PASSWORD=goodidea \
     --env POSTGRES_DB=tasks \
     postgres:16-bookworm
