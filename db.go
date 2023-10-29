@@ -1,4 +1,4 @@
-package main
+package goodidea
 
 import (
 	"context"
@@ -8,10 +8,10 @@ import (
 )
 
 var (
-	db *pgxpool.Pool
+	DB *pgxpool.Pool
 )
 
-func connect() error {
+func Connect() error {
 	dbpool, err := pgxpool.New(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Printf("Unable to create connection pool: %v\n", err)
@@ -24,6 +24,6 @@ func connect() error {
 		return err
 	}
 
-	db = dbpool
+	DB = dbpool
 	return nil
 }

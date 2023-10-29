@@ -3,20 +3,22 @@ package main
 import (
 	"log"
 	"net/http"
+
+	"github.com/lwileczek/goodidea"
 )
 
 func main() {
-	err := connect()
+	err := goodidea.Connect()
 	if err != nil {
 		log.Fatal("Unable to create a connection to the database", err)
 	}
-	defer db.Close()
+	defer goodidea.DB.Close()
 
 	//Create a logger
-	SetupLogger()
+	goodidea.SetupLogger()
 
 	//Set up mux router
-	mux := NewServer()
+	mux := goodidea.NewServer()
 
 	//Runnit
 	log.Printf("Starting on 0.0.0.0:8080")

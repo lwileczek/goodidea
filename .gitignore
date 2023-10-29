@@ -1,3 +1,6 @@
 node_modules/
 kodasta/*.js*
 kodasta/*.css
+
+.DS_Store
+*.zip
