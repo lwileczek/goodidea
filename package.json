@@ -1,11 +1,11 @@
 {
   "name": "goodidea",
-  "version": "1.0.0",
+  "version": "0.1.0-beta",
   "description": "Feedback and task management",
   "main": "index.js",
   "scripts": {
-    "build:css": "npx tailwindcss -i ./src/input.css -o ./kodata/main.css",
-    "build:js": "esbuild src/*.js --bundle --minify --sourcemap --target=chrome85,firefox85,safari14 --outdir=kodata",
+    "build:css": "npx tailwindcss -i ./src/input.css -o ./static/main.css",
+    "build:js": "esbuild src/*.js --bundle --minify --sourcemap --target=chrome85,firefox85,safari14 --outdir=static",
     "build": "npm run build:css && npm run build:js",
     "lint": "npx @biomejs/biome lint ./src/*.js",
     "fix": "npx @biomejs/biome check --apply ./src/*.js"

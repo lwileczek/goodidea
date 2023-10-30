@@ -1,0 +1,36 @@
+services:
+  app:
+    container_name: ideas
+    image: alomio/goodidea:v0.0.1
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080"
+    environment:
+      - DATABASE_URL=postgres://idea:hardPassW0rd@db:5432/tasks
+    networks:
+      - front-tier
+      - back-tier
+
+  db:
+    image: postgres:14-bookworm
+    container_name: task-db
+    environment:
+      - POSTGRES_PASSWORD=hardPassW0rd
+      - POSTGRES_USER=idea
+      - POSTGRES_DB=tasks
+    volumes:
+      - ./initdb:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - back-tier
+
+networks:
+  # The presence of these objects is sufficient to define them
+  front-tier: {}
+  back-tier: {}
