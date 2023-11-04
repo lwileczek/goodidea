@@ -1,3 +1,3 @@
 run:
 	npm run build
-	go run ./...
+	go run ./app/main.go

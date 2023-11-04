@@ -1,4 +1,4 @@
-package main
+package goodidea
 
 import (
 	"context"
@@ -33,7 +33,7 @@ func getAllTaskComments(taskID uint32) ([]Comment, error) {
 		task_id = $1`
 
 	comments := make([]Comment, 0, 4)
-	rows, err := db.Query(ctx, query, taskID)
+	rows, err := DB.Query(ctx, query, taskID)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return comments, nil
@@ -62,6 +62,6 @@ func addComment(t uint32, u *string, c string) error {
 	ctx := context.Background()
 	query := "INSERT INTO comments(task_id, username, content) VALUES($1, $2, $3)"
 
-	_, err := db.Exec(ctx, query, t, u, c)
+	_, err := DB.Exec(ctx, query, t, u, c)
 	return err
 }

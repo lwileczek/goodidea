@@ -1,3 +1,16 @@
+# JS
 node_modules/
-kodasta/*.js*
-kodasta/*.css
+static/*.js*
+static/*.css
+
+# Ko Containers
+app/kodata
+
+# OSX
+.DS_Store
+
+# Builds
+*.zip
+*.exe
+## Lambda binary build name
+bootstrap

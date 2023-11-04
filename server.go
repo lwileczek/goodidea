@@ -1,10 +1,9 @@
-package main
+package goodidea
 
 import (
 	"fmt"
 	"html/template"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 
@@ -180,7 +179,7 @@ func NewServer() *mux.Router {
 	mux.HandleFunc("/tasks/{id}/score", updateScore).Methods("POST")
 	mux.HandleFunc("/tasks/{id}/comments", postComment).Methods("POST")
 
-	s := http.StripPrefix("/static/", http.FileServer(http.Dir(os.Getenv("KO_DATA_PATH"))))
+	s := http.StripPrefix("/static/", http.FileServer(http.Dir("./static/")))
 	mux.PathPrefix("/static/").Handler(s)
 
 	return mux

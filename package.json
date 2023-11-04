@@ -1,6 +1,6 @@
 {
   "name": "goodidea",
-  "version": "1.0.0",
+  "version": "0.1.0-beta",
   "description": "Feedback and task management",
   "main": "index.js",
   "scripts": {

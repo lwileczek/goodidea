@@ -1,4 +1,4 @@
-package main
+package goodidea
 
 import (
 	"context"
@@ -37,7 +37,7 @@ ORDER BY
 	score DESC`
 
 	tasks := make([]Task, 0, 8)
-	rows, err := db.Query(ctx, query)
+	rows, err := DB.Query(ctx, query)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return tasks, nil
@@ -80,7 +80,7 @@ ORDER BY
 	score DESC`
 
 	tasks := make([]Task, 0, 8)
-	rows, err := db.Query(ctx, query, clue)
+	rows, err := DB.Query(ctx, query, clue)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return tasks, nil
@@ -111,7 +111,7 @@ func getTasksByID(id uint32) (Task, error) {
 	query := "SELECT id, status, title, body, score, completed_at, created_at FROM tasks WHERE id = $1 and deleted_at IS NULL"
 
 	var task Task
-	if err := db.QueryRow(ctx, query, id).Scan(
+	if err := DB.QueryRow(ctx, query, id).Scan(
 		&task.ID,
 		&task.Status,
 		&task.Title,
@@ -131,7 +131,7 @@ func addTask(title, details string) (uint32, error) {
 	query := "INSERT INTO tasks(title, body) VALUES($1, $2) RETURNING id"
 
 	var newID uint32
-	if err := db.QueryRow(ctx, query, title, details).Scan(&newID); err != nil {
+	if err := DB.QueryRow(ctx, query, title, details).Scan(&newID); err != nil {
 		return 0, err
 	}
 	return newID, nil
@@ -145,11 +145,11 @@ func updateTaskScore(id uint32, inc bool) (int32, error) {
 		symbol = "+"
 	}
 	query := fmt.Sprintf("UPDATE tasks SET score = score %s 1 WHERE id = $1", symbol)
-	if _, err := db.Exec(ctx, query, id); err != nil {
+	if _, err := DB.Exec(ctx, query, id); err != nil {
 		return 0, err
 	}
 
-	if err := db.QueryRow(ctx, "SELECT score FROM tasks WHERE id = $1", id).Scan(&score); err != nil {
+	if err := DB.QueryRow(ctx, "SELECT score FROM tasks WHERE id = $1", id).Scan(&score); err != nil {
 		return 0, err
 	}
 

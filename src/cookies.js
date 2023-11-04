@@ -25,7 +25,7 @@ const setCookie = (taskId, vote, exdays) => {
 	const d = new Date();
 	d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
 	const expires = `Expires=${d.toUTCString()}`;
-    document.cookie = `${taskId}=${vote};${expires};path=/; SameSite=Strict; Secure;`;
+	document.cookie = `${taskId}=${vote};${expires};path=/; SameSite=Strict; Secure;`;
 };
 
 /**
@@ -35,7 +35,7 @@ const setCookie = (taskId, vote, exdays) => {
  * @returns{string} and empty string if not found or the cookie value if it does
  */
 const getCookie = (cname) => {
-    const name = `${cname}=`;
+	const name = `${cname}=`;
 	const decodedCookie = decodeURIComponent(document.cookie);
 	const ca = decodedCookie.split(";");
 	for (let i = 0; i < ca.length; i++) {
@@ -56,7 +56,7 @@ const listAllCookieNames = () => {
 	const cookieNames = [];
 	for (const cookie of cookieArray) {
 		const [name, value] = cookie.split("=");
-        cookieNames.push(`${name}-${value}`);
+		cookieNames.push(`${name}-${value}`);
 	}
 
 	return cookieNames;
@@ -68,18 +68,18 @@ const listAllCookieNames = () => {
  * recorded previous to this visit
  */
 const applyPreviousVotes = () => {
-    const previousVotes = listAllCookieNames();
-    if (previousVotes.length ===0) {
-        return;
-    }
+	const previousVotes = listAllCookieNames();
+	if (previousVotes.length === 0) {
+		return;
+	}
 
-    for (let v=0; v< previousVotes.length; v++) {
-        const radio = document.getElementById(previousVotes[v]);
-        //Could have a cookie for a task not shown
-        if (radio) {
-            radio.checked = true;
-        }
-    }
+	for (let v = 0; v < previousVotes.length; v++) {
+		const radio = document.getElementById(previousVotes[v]);
+		//Could have a cookie for a task not shown
+		if (radio) {
+			radio.checked = true;
+		}
+	}
 };
 
 setVoteListeners();
