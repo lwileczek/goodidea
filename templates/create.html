@@ -7,11 +7,26 @@
         
         <!-- icons -->
         <div class="icons flex text-gray-500 m-2">
+            <!-- emoji -->
           <svg class="mr-2 cursor-pointer hover:text-gray-700 border rounded-full p-1 h-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <!-- upload -->
           <svg class="mr-2 cursor-pointer hover:text-gray-700 border rounded-full p-1 h-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
           <div class="count ml-auto text-gray-400 text-xs font-semibold">0/300</div>
         </div>
         <button type="submit" class="btn border border-sky-500 p-1 px-4 font-semibold cursor-pointer text-gray-200 ml-2 bg-sky-500 hover:bg-sky-500/75">Create</button>
     </form>
+    <form id='form' hx-encoding='multipart/form-data' hx-post='/upload'>
+        <input type='file' name='myFile'>
+        <button class="btn border border-sky-500 p-1 px-4 font-semibold cursor-pointer text-gray-200 ml-2 bg-sky-500 hover:bg-sky-500/75">
+            Upload
+          <svg class="mr-2 cursor-pointer hover:text-gray-700 border rounded-full p-1 h-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
+        </button>
+        <progress id='progress' value='0' max='100'></progress>
+    </form>
 </div>
+<script>
+    htmx.on('#form', 'htmx:xhr:progress', function(evt) {
+      htmx.find('#progress').setAttribute('value', evt.detail.loaded/evt.detail.total * 100)
+    });
+</script>
 {{end}}
