@@ -4,3 +4,9 @@ run:
 
 deployLambda:
 	bash utils/deploy.sh
+
+buildContainer:
+	npm run build
+	mkdir app/kodata
+	cp -r static templates app/kodata
+	ko build ./app/...

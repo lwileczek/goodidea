@@ -16,15 +16,11 @@ func index(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Could not get all tasks from db", err)
 	}
 
-	//w.Header().Add("Content-Type", "text/html; charset=UTF-8")
-	//w.WriteHeader(http.StatusOK)
 	tmpl := template.Must(template.ParseGlob("templates/*.html"))
 	err = tmpl.ExecuteTemplate(w, "index.html", tsks)
 	if err != nil {
 		fmt.Println("Could not execute template", err)
 	}
-	//w.Header().Add("Content-Type", "text/html; charset=UTF-8")
-	//w.WriteHeader(http.StatusOK)
 }
 
 func listTasks(w http.ResponseWriter, r *http.Request) {

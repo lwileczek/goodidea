@@ -50,13 +50,18 @@ const getCookie = (cname) => {
 	return "";
 };
 
+/**
+ * @Function{listAllCookieNames}
+ * List all of the cookies to see if they voted previously
+ * @returns, a list of radio element IDs which indicate previous votes
+ */
 const listAllCookieNames = () => {
 	const allCookies = document.cookie;
 	const cookieArray = allCookies.split(";");
 	const cookieNames = [];
 	for (const cookie of cookieArray) {
 		const [name, value] = cookie.split("=");
-		cookieNames.push(`${name}-${value}`);
+		cookieNames.push(`${name.trim()}-${value.trim()}`); //sometimes the name has a space
 	}
 
 	return cookieNames;
@@ -76,7 +81,7 @@ const applyPreviousVotes = () => {
 	for (let v = 0; v < previousVotes.length; v++) {
 		const radio = document.getElementById(previousVotes[v]);
 		//Could have a cookie for a task not shown
-		if (radio) {
+		if (radio !== undefined && radio !== null) {
 			radio.checked = true;
 		}
 	}
