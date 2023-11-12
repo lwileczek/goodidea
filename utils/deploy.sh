@@ -14,9 +14,9 @@
 # Delete an previous build if exists
 rm -f -- bootstrap function.zip 
 
-REGION=us-west-2
+REGION=us-east-1
 FUNC_NAME=goodidea
-RELEASE_PATH=$(dirname $PWD) # Where to start looking for files
+RELEASE_PATH=$PWD # Where to start looking for files
 ARCHIVE=${LAMBDA_ARCHIVE:-function.zip} # the name of the zip file to deploy
 BINARY_PATH=${RELEASE_PATH}/lambda
 
@@ -28,7 +28,7 @@ deploy () {
         -tags lambda.norpc \
         $BINARY_PATH
 
-    zip -r function.zip bootstrap kodata
+    zip -r function.zip bootstrap static templates
 
     aws lambda update-function-code \
         --region $REGION \

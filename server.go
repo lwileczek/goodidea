@@ -16,11 +16,15 @@ func index(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Could not get all tasks from db", err)
 	}
 
+	//w.Header().Add("Content-Type", "text/html; charset=UTF-8")
+	//w.WriteHeader(http.StatusOK)
 	tmpl := template.Must(template.ParseGlob("templates/*.html"))
 	err = tmpl.ExecuteTemplate(w, "index.html", tsks)
 	if err != nil {
 		fmt.Println("Could not execute template", err)
 	}
+	//w.Header().Add("Content-Type", "text/html; charset=UTF-8")
+	//w.WriteHeader(http.StatusOK)
 }
 
 func listTasks(w http.ResponseWriter, r *http.Request) {
@@ -170,9 +174,16 @@ func postComment(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func notFound(w http.ResponseWriter, r *http.Request) {
+	s := fmt.Sprintf("<h2>404 Could not find!</h2><p>Path Provided: %s</p>", r.URL)
+	fmt.Fprintf(w, s)
+}
+
 func NewServer() *mux.Router {
 	mux := mux.NewRouter()
-	mux.HandleFunc("/", index)
+	mux.HandleFunc("/", index).Methods("GET")
+	mux.HandleFunc("/prod", index).Methods("GET")
+	mux.HandleFunc("/prod/goodidea", index).Methods("GET")
 	mux.HandleFunc("/tasks", listTasks).Methods("GET")
 	mux.HandleFunc("/tasks", createTask).Methods("POST")
 	mux.HandleFunc("/tasks/{id}", viewTask).Methods("GET")
@@ -181,6 +192,8 @@ func NewServer() *mux.Router {
 
 	s := http.StripPrefix("/static/", http.FileServer(http.Dir("./static/")))
 	mux.PathPrefix("/static/").Handler(s)
+
+	mux.NotFoundHandler = http.HandlerFunc(notFound)
 
 	return mux
 }
