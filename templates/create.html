@@ -1,32 +1,23 @@
 {{ define "createForm" }}
-<div>
+<section>
     <p class="max-w-2xl mx-auto mb-5">Have some feedback or want to make a new request? Submit a request here and upvote it to get it prioritiezed</p>
-    <form hx-post="/tasks" hx-swap="beforeend" hx-target="#task-list" hx-on::after-request="this.reset()" class="bg-white editor mx-auto w-10/12 flex flex-col text-gray-800 border border-gray-300 p-4 shadow-lg max-w-2xl">
+    <form hx-post="/tasks" hx-swap="beforeend"hx-encoding='multipart/form-data' hx-target="#task-list" hx-on::after-request="this.reset()" class="bg-white editor mx-auto w-10/12 flex flex-col text-gray-800 border border-gray-300 p-4 shadow-lg max-w-2xl">
         <input class="title bg-gray-100 border border-gray-300 p-2 mb-4 outline-none" spellcheck="false" placeholder="Title" type="text" name="title">
         <textarea class="description bg-gray-100 sec p-3 h-60 border border-gray-300 outline-none" spellcheck="false" name="details" placeholder="Describe everything about this post here"></textarea>
         
         <!-- icons -->
         <div class="icons flex text-gray-500 m-2">
-            <!-- emoji -->
+          <!-- emoji -->
           <svg class="mr-2 cursor-pointer hover:text-gray-700 border rounded-full p-1 h-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            <!-- upload -->
-          <svg class="mr-2 cursor-pointer hover:text-gray-700 border rounded-full p-1 h-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
+          <!-- upload -->
+          <label for="newImgUpload">
+            <svg class="mr-2 cursor-pointer hover:text-gray-700 border rounded-full p-1 h-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
+          </label>
+          <input id="newImgUpload" class="hidden" type='file' name='taskImgs' accept="image/*">
+          <img src="https://api.iconify.design/svg-spinners:bars-rotate-fade.svg" id="create-spinner" class="htmx-indicator" alt="spinner">
           <div class="count ml-auto text-gray-400 text-xs font-semibold">0/300</div>
         </div>
         <button type="submit" class="btn border border-sky-500 p-1 px-4 font-semibold cursor-pointer text-gray-200 ml-2 bg-sky-500 hover:bg-sky-500/75">Create</button>
     </form>
-    <form id='form' hx-encoding='multipart/form-data' hx-post='/upload'>
-        <input type='file' name='myFile'>
-        <button class="btn border border-sky-500 p-1 px-4 font-semibold cursor-pointer text-gray-200 ml-2 bg-sky-500 hover:bg-sky-500/75">
-            Upload
-          <svg class="mr-2 cursor-pointer hover:text-gray-700 border rounded-full p-1 h-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
-        </button>
-        <progress id='progress' value='0' max='100'></progress>
-    </form>
-</div>
-<script>
-    htmx.on('#form', 'htmx:xhr:progress', function(evt) {
-      htmx.find('#progress').setAttribute('value', evt.detail.loaded/evt.detail.total * 100)
-    });
-</script>
+</section>
 {{end}}

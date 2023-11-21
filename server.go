@@ -3,9 +3,10 @@ package goodidea
 import (
 	"fmt"
 	"html/template"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -65,10 +66,10 @@ func updateScore(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, fmt.Sprintf("%d", score))
 }
 
-//createTask - recieve a title and body and create a new task in the DB with default values
-//return an HTML block of the Task summarized to be displayed on landing page
+// createTask - recieve a title and body and create a new task in the DB with default values
+// return an HTML block of the Task summarized to be displayed on landing page
 func createTask(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
+	err := r.ParseMultipartForm(10 << 20) //10MB
 	if err != nil {
 		fmt.Println("Error parsing form", err)
 	}
@@ -104,6 +105,30 @@ func createTask(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println("Could not execute template", err)
 	}
+
+	//------------
+	//TODO: Add filepath to the data record so when they open the task the image shows
+	file, header, err := r.FormFile("taskImgs") //matches html
+	if err != nil {
+		Logr.Error("Could not retrive file from form data", "error", err)
+		return
+	}
+	defer file.Close()
+	nameComponents := strings.Split(header.Filename, ".")
+	if len(nameComponents) != 2 {
+		Logr.Error("Could not find the extension of the uploaded file", "error", err)
+		return
+	}
+
+	b, err := io.ReadAll(file)
+	if err != nil {
+		Logr.Error("could not read bytes out of file sent", "error", err)
+		return
+	}
+	m := NewFileManager()
+	m.StoreFile(b, nameComponents[1])
+	//------
+
 }
 
 func viewTask(w http.ResponseWriter, r *http.Request) {
@@ -171,38 +196,6 @@ func postComment(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func uploadFile(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("upload")
-	//step 1. parse input / multipart/form-data
-	r.ParseMultipartForm(10 << 20) //10MB
-	//step 2. get file
-	file, handler, err := r.FormFile("myFile") //matches html
-	if err != nil {
-		Logr.Error("Could not retrive file from form data", "error", err)
-		fmt.Fprintf(w, "<p>ERROR! could not parse file from form data</p>")
-		return
-	}
-	defer file.Close()
-	fmt.Println(handler.Filename)
-	//step 3. write tmp file
-	tempFile, err := ioutil.TempFile("tmp", "upload-*.png")
-	if err != nil {
-		Logr.Error("could not create a tempfile", "error", err)
-		fmt.Fprintf(w, "<p>ERROR! could not create a temp file</p>")
-		return
-	}
-	defer tempFile.Close()
-	//step 4. write response
-	fileBytes, err := ioutil.ReadAll(file)
-	if err != nil {
-		Logr.Error("could not read file bytes", "error", err)
-		fmt.Fprintf(w, "<p>ERROR! could not read the bytes out of the file object</p>")
-		return
-	}
-
-	tempFile.Write(fileBytes)
-}
-
 func notFound(w http.ResponseWriter, r *http.Request) {
 	s := fmt.Sprintf("<h2>404 Could not find!</h2><p>Path Provided: %s</p>", r.URL)
 	fmt.Fprintf(w, s)
@@ -218,8 +211,6 @@ func NewServer() *mux.Router {
 	mux.HandleFunc("/tasks/{id}", viewTask).Methods("GET")
 	mux.HandleFunc("/tasks/{id}/score", updateScore).Methods("POST")
 	mux.HandleFunc("/tasks/{id}/comments", postComment).Methods("POST")
-
-	mux.HandleFunc("/upload", uploadFile).Methods("POST")
 
 	s := http.StripPrefix("/static/", http.FileServer(http.Dir("./static/")))
 	mux.PathPrefix("/static/").Handler(s)
