@@ -106,14 +106,14 @@ func createTask(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Could not execute template", err)
 	}
 
-	//------------
-	//TODO: Add filepath to the data record so when they open the task the image shows
+	//Add any images which may have been sent along with the form data
 	file, header, err := r.FormFile("taskImgs") //matches html
 	if err != nil {
 		Logr.Error("Could not retrive file from form data", "error", err)
 		return
 	}
 	defer file.Close()
+
 	nameComponents := strings.Split(header.Filename, ".")
 	if len(nameComponents) != 2 {
 		Logr.Error("Could not find the extension of the uploaded file", "error", err)
@@ -125,10 +125,15 @@ func createTask(w http.ResponseWriter, r *http.Request) {
 		Logr.Error("could not read bytes out of file sent", "error", err)
 		return
 	}
-	m := NewFileManager()
-	m.StoreFile(b, nameComponents[1])
-	//------
 
+	//TODO: can the rest of the following be done in a go routine?
+	m := NewFileManager()
+	s, err := m.StoreFile(b, nameComponents[1])
+	if err != nil {
+		Logr.Error("Unable to store images", "task", taskID, "error", err.Error())
+		return
+	}
+	go saveTaskImages(taskID, []string{s})
 }
 
 func viewTask(w http.ResponseWriter, r *http.Request) {
@@ -138,6 +143,7 @@ func viewTask(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "ERROR! Could not get task ID from request")
 		return
 	}
+	//TODO: Why not get all of the comments for the task in one query?
 	tsk, err := getTasksByID(uint32(id))
 	if err != nil {
 		Logr.Error("could not get task by id", "taskID", id, "error", err)
@@ -196,6 +202,29 @@ func postComment(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func displayTaskImages(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.ParseUint(mux.Vars(r)["id"], 10, 64)
+	if err != nil {
+		Logr.Error("Could not parse id", "err", err)
+		fmt.Fprintf(w, "ERROR! Could not get task ID from request")
+		return
+	}
+	paths, err := getTaskImages(uint32(id))
+	if err != nil {
+		Logr.Error("could not get image paths", "task", id, "err", err)
+		fmt.Fprintf(w, "ERROR! Could not get images for task %d", id)
+		return
+	}
+	if len(paths) == 0 {
+		return
+	}
+	content := ""
+	for _, p := range paths {
+		content += fmt.Sprintf(`<img class="h-32 w-32" src="%s" alt="task-image" width="128" height="128">`, p)
+	}
+	fmt.Fprintf(w, content)
+}
+
 func notFound(w http.ResponseWriter, r *http.Request) {
 	s := fmt.Sprintf("<h2>404 Could not find!</h2><p>Path Provided: %s</p>", r.URL)
 	fmt.Fprintf(w, s)
@@ -211,6 +240,7 @@ func NewServer() *mux.Router {
 	mux.HandleFunc("/tasks/{id}", viewTask).Methods("GET")
 	mux.HandleFunc("/tasks/{id}/score", updateScore).Methods("POST")
 	mux.HandleFunc("/tasks/{id}/comments", postComment).Methods("POST")
+	mux.HandleFunc("/tasks/{id}/images", displayTaskImages).Methods("GET")
 
 	s := http.StripPrefix("/static/", http.FileServer(http.Dir("./static/")))
 	mux.PathPrefix("/static/").Handler(s)

@@ -6,7 +6,7 @@ import (
 )
 
 type FileManager interface {
-	StoreFile(b []byte, ext string) error
+	StoreFile(b []byte, ext string) (string, error)
 }
 
 type localStorage struct {
@@ -22,31 +22,35 @@ type objectStorage struct {
 	endpoint string
 	//The name of the bucket
 	bucket string
+	// cdn is an optional property which provides the base URL of the CDN used to serve the images
+	// after it has been uploaded
+	cdn string
 }
 
 // StoreFile - store a file locally with the provided file extension
-func (ls *localStorage) StoreFile(b []byte, ext string) error {
+func (ls *localStorage) StoreFile(b []byte, ext string) (string, error) {
 	if ls.dirName == "" {
 		ls.dirName = os.TempDir()
 	}
 	f, err := os.CreateTemp(ls.dirName, fmt.Sprintf("idea-*.%s", ext))
 	if err != nil {
 		Logr.Error("Error Creating Local TMP file", "err", err.Error())
-		return err
+		return "", err
 	}
 	defer f.Close()
 	_, err = f.Write(b)
 	if err != nil {
 		Logr.Error("Error writing bytes to a temp file", "err", err.Error())
-		return err
+		return "", err
 	}
 
-	return nil
+	s := fmt.Sprintf("%s/%s", ls.dirName, f.Name())
+	return s, nil
 }
 
 func NewFileManager() FileManager {
 	fm := localStorage{
-		dirName: "tmp",
+		dirName: "static/img",
 	}
 	return &fm
 }

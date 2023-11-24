@@ -19,6 +19,7 @@ type Task struct {
 	CreatedAt   time.Time  `json:"createdAt"`
 	DeletedAt   time.Time  `json:"deletedAt"`
 	Comments    []Comment  `json:"comments"`
+	Images      []string   `json:"images"` //paths to get all of the images associated with task
 }
 
 func getAllTasks() ([]Task, error) {
