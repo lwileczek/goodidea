@@ -220,8 +220,10 @@ func displayTaskImages(w http.ResponseWriter, r *http.Request) {
 	}
 	content := ""
 	for _, p := range paths {
-		content += fmt.Sprintf(`<img class="h-32 w-32" src="%s" alt="task-image" width="128" height="128">`, p)
+		content += fmt.Sprintf(`<img onclick="enlargeModal()" class="h-32 w-32 cursor-pointer" src="%s" alt="task-image" width="128" height="128">`, p)
 	}
+	//This script is defiend in src/showTask.js, it adds a listener to each image
+	content += `<script src="/static/enlargeImages.js"></script>`
 	fmt.Fprintf(w, content)
 }
 

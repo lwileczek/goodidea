@@ -17,9 +17,9 @@
                 hx-trigger="keyup delay:100ms"
                 ></input>
         </div>
-        <section id="main" class="grid grid-cols-3 gap-4">
+        <div class="grid grid-cols-3 gap-4">
             {{ template "createForm" .}}
-            <section id="task-constainer" class="col-span-2">
+            <main id="task-constainer" class="col-span-2">
                 <h1 class="text-3xl mb-5">Feedback Requests</h1>
                 <div id="task-list">
                     {{ range . }}
@@ -30,8 +30,8 @@
                     id="spinner"
                     class="htmx-indicator h-48 w-48 animate-spin border-white border-t-sky-500 border-[16px] rounded-[50%]"
                 ></div>
-            </section>
-        </section>
+            </main>
+        </div>
         {{ template "footer" .}}
         <script src="/static/cookies.js"></script>
     </body>

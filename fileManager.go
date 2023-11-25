@@ -44,7 +44,7 @@ func (ls *localStorage) StoreFile(b []byte, ext string) (string, error) {
 		return "", err
 	}
 
-	s := fmt.Sprintf("%s/%s", ls.dirName, f.Name())
+	s := fmt.Sprintf("/%s", f.Name())
 	return s, nil
 }
 

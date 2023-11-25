@@ -13,13 +13,13 @@
                 <hr>
                 <p class="text-lg mb-10">{{ .Body }}</p>
             </section>
-            <div id="imgs">
+            <div id="imgs"class="col-start-2 col-span-4">
                 <div hx-get="/tasks/{{ .ID }}/images" hx-trigger="load"></div>
             </div>
             <section id="comment-container" class="col-start-2 col-span-4">
                 <div class="grid grid-cols-10">
                     <h2 class="col-start-1 text-xl bold">Discussion</h2>
-                    <a href="#commentForm" class="cursor-pointer col-start-10 leading-7" onclick="showForm();">
+                    <a id="addComment" href="#commentForm" class="cursor-pointer col-start-10 leading-7">
                         <em class="text-xs text-sky-800">Add Comment</em>
                     </a>
                 </div>
@@ -46,8 +46,9 @@
             </section>
         </article>
         {{ template "footer" }}
-        <script>
-            function showForm(){var x=document.getElementById("commentForm");if(x.style.display==="flex"){x.style.display="none";}else{x.style.display="flex";}}
-        </script>
+        <script src="/static/showCommentForm.js"></script>
+        <dialog id="bigImg" class="h-full w-full p-10 transition-opacity ease-in-out duration-500 bg-contain bg-no-repeat bg-center rounded-lg">
+            <button type="button">X</button>
+        </dialog>
     </body>
 </html>
