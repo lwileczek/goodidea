@@ -1,4 +1,10 @@
+build:
+	mkdir -p static/img
+	npm run build
+	go build -o server ./app/main.go 
+
 run:
+	mkdir -p static/img
 	npm run build
 	go run ./app/main.go
 
