@@ -1,6 +1,6 @@
 #!/bin/bash -xe
 
-sudo docker run \
+podman run \
     -v $(dirname $PWD)/initdb:/docker-entrypoint-initdb.d \
     --publish 5555:5432 \
     --detach \
@@ -8,4 +8,4 @@ sudo docker run \
     --env POSTGRES_USER=fairy \
     --env POSTGRES_PASSWORD=goodidea \
     --env POSTGRES_DB=tasks \
-    postgres:16-bookworm
+    docker.io/postgres:16-bookworm

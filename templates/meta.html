@@ -7,12 +7,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="icon" type="image/ico" href="/static/favicon.ico" />
     <link href="/static/main.css" rel="stylesheet">
-    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+    <link rel="preconnect" href="https://d36yxaw9xj00lp.cloudfront.net" crossorigin>
+    <script src="https://unpkg.com/htmx.org@1.9.8"></script>
 	<title>Task Manager</title>
     <style>
+        @font-face {
+          font-family: "chillax";
+          src: url('https://d36yxaw9xj00lp.cloudfront.net/fonts/Chillax-Regular.eot');
+          src: url('https://d36yxaw9xj00lp.cloudfront.net/fonts/Chillax-Regular.eot') format('embedded-opentype'),
+               url('https://d36yxaw9xj00lp.cloudfront.net/fonts/Chillax-Regular.woff2') format('woff2'),
+               url('https://d36yxaw9xj00lp.cloudfront.net/fonts/Chillax-Regular.woff2') format('woff'),
+               url('https://d36yxaw9xj00lp.cloudfront.net/fonts/Chillax-Regular.ttf') format('truetype');
+        }
         html, body {
             height: 100%;
-            font-family: proxima-nova, "Helvetica Neue", Arial, sans-serif;
+            font-family: chillax, "Helvetica Neue", Arial, sans-serif;
         }
         .task-score input[type="radio"]:checked+label {
             background-color: AntiqueWhite;

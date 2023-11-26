@@ -3,22 +3,21 @@
     {{ template "meta" }}
     <body class="bg-slate-50">
         {{ template "header" }}
-        <div class="grid grid-cols-6 gap-4">
-            <div class="col-start-2 col-span-4">
+        <article class="grid grid-cols-6 gap-4">
+            <section class="col-start-2 col-span-4">
                 <h1 class="fontsemi-bold text-2xl mb-5">{{ .Title }}</h1>
                 <div class="text-sm grid gird-cols-10">
                     <p class="col-start-1">Requested: {{ .CreatedAt.Format "2006 Jan 02" -}}</p>
                     <p class="col-start-10">Status: {{ if .Status }}Completed{{ else }}Incomplete{{end -}}</p>
                 </div>
                 <hr>
-            </div>
-            <div class="text-lg col-start-2 col-span-4 mb-10">
-                <p>{{ .Body }}</p>
-            </div>
+                <p class="text-lg mb-10">{{ .Body }}</p>
+            </section>
+            <div id="imgs"class="flex col-start-2 col-span-4" hx-get="/tasks/{{ .ID }}/images" hx-trigger="load"></div>
             <section id="comment-container" class="col-start-2 col-span-4">
                 <div class="grid grid-cols-10">
                     <h2 class="col-start-1 text-xl bold">Discussion</h2>
-                    <a href="#commentForm" class="cursor-pointer col-start-10 leading-7" onclick="showForm();">
+                    <a id="addComment" href="#commentForm" class="cursor-pointer col-start-10 leading-7">
                         <em class="text-xs text-sky-800">Add Comment</em>
                     </a>
                 </div>
@@ -32,7 +31,7 @@
                     hx-swap="beforeend"
                     hx-target="#comments"
                     hx-on::after-request="this.reset()"
-                    class="bg-white mx-auto w-10/12 hidden flex-col border border-gray-300 p-4 shadow-lg max-w-2xl"
+                    class="bg-white mb-20 mx-auto w-10/12 hidden flex-col border border-gray-300 p-4 shadow-lg max-w-2xl"
                     >
                     <input class="title bg-gray-100 border border-gray-300 p-2 mb-4 outline-none" spellcheck="false" placeholder="Username (optional)" type="text" name="username">
                     <textarea class="description bg-gray-100 sec p-3 h-60 border border-gray-300 outline-none" spellcheck="false" name="comments" placeholder="Write a comment or question here..."></textarea>
@@ -43,10 +42,11 @@
                     </div>
                 </form>
             </section>
-        </div>
+        </article>
         {{ template "footer" }}
-        <script>
-            function showForm(){var x=document.getElementById("commentForm");if(x.style.display==="flex"){x.style.display="none";}else{x.style.display="flex";}}
-        </script>
+        <script src="/static/showCommentForm.js"></script>
+        <dialog id="bigImg" class="flex h-10 w-10 open:h-full open:w-full p-10 transition-opacity ease-in duration-0 open:duration-500 bg-contain bg-no-repeat bg-center rounded-lg opacity-0 open:opacity-100 justify-end content-start">
+            <button type="button" class="h-10 w-10">X</button>
+        </dialog>
     </body>
 </html>

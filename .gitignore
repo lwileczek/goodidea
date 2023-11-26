@@ -3,6 +3,7 @@ node_modules/
 static/*.js*
 static/*.js.map
 static/*.css
+static/img
 
 # Ko Containers
 app/kodata
@@ -16,3 +17,5 @@ app/kodata
 ## Lambda binary build name
 bootstrap
 main
+
+tmp
