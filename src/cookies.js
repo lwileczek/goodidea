@@ -61,9 +61,9 @@ const listAllCookieNames = () => {
 	const cookieNames = [];
 	for (const cookie of cookieArray) {
 		const [n, val] = cookie.split("=");
-        if (n && val) {
-            cookieNames.push(`${n.trim()}-${val.trim()}`); //sometimes the name has a space
-        }
+		if (n && val) {
+			cookieNames.push(`${n.trim()}-${val.trim()}`); //sometimes the name has a space
+		}
 	}
 
 	return cookieNames;
