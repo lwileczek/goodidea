@@ -47,8 +47,8 @@
         </article>
         {{ template "footer" }}
         <script src="/static/showCommentForm.js"></script>
-        <dialog id="bigImg" class="h-full w-full p-10 transition-opacity ease-in-out duration-500 bg-contain bg-no-repeat bg-center rounded-lg">
-            <button type="button">X</button>
+        <dialog id="bigImg" class="flex h-full w-full p-10 transition-opacity ease-in-out duration-500 bg-contain bg-no-repeat bg-center rounded-lg opacity-0 open:opacity-100 justify-end content-start">
+            <button type="button" class="h-10 w-10">X</button>
         </dialog>
     </body>
 </html>
