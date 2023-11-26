@@ -1,7 +1,14 @@
 {{ define "createForm" }}
 <section>
     <p class="max-w-2xl mx-auto mb-5">Have some feedback or want to make a new request? Submit a request here and upvote it to get it prioritiezed</p>
-    <form hx-post="/tasks" hx-swap="beforeend"hx-encoding='multipart/form-data' hx-target="#task-list" hx-on::after-request="this.reset()" class="bg-white editor mx-auto w-10/12 flex flex-col text-gray-800 border border-gray-300 p-4 shadow-lg max-w-2xl">
+    <form 
+       hx-post="/tasks"
+       hx-swap="beforeend"
+       hx-encoding='multipart/form-data'
+       hx-target="#task-list"
+       hx-on::after-request="this.reset();this.querySelector('#uploadFile').innerHTML=''"
+       class="bg-white editor mx-auto w-10/12 flex flex-col text-gray-800 border border-gray-300 p-4 shadow-lg max-w-2xl"
+    >
         <input class="title bg-gray-100 border border-gray-300 p-2 mb-4 outline-none" spellcheck="false" placeholder="Title" type="text" name="title">
         <textarea class="description bg-gray-100 sec p-3 h-60 border border-gray-300 outline-none" spellcheck="false" name="details" placeholder="Describe everything about this post here"></textarea>
         

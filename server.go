@@ -69,7 +69,8 @@ func updateScore(w http.ResponseWriter, r *http.Request) {
 // createTask - recieve a title and body and create a new task in the DB with default values
 // return an HTML block of the Task summarized to be displayed on landing page
 func createTask(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseMultipartForm(10 << 20) //10MB
+	//TODO: MultipartReader to transform this to a steam
+	err := r.ParseMultipartForm(32 << 20) //32MB
 	if err != nil {
 		fmt.Println("Error parsing form", err)
 	}
@@ -107,33 +108,40 @@ func createTask(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Add any images which may have been sent along with the form data
-	file, header, err := r.FormFile("taskImgs") //matches html
-	if err != nil {
-		Logr.Error("Could not retrive file from form data", "error", err)
-		return
-	}
-	defer file.Close()
-
-	nameComponents := strings.Split(header.Filename, ".")
-	if len(nameComponents) != 2 {
-		Logr.Error("Could not find the extension of the uploaded file", "error", err)
+	fhs, ok := r.MultipartForm.File["taskImgs"] //matches html
+	if !ok {
 		return
 	}
 
-	b, err := io.ReadAll(file)
-	if err != nil {
-		Logr.Error("could not read bytes out of file sent", "error", err)
-		return
-	}
+	filePaths := make([]string, len(fhs))
+	for i, fh := range fhs {
+		f, err := fh.Open()
+		defer f.Close()
 
-	//TODO: can the rest of the following be done in a go routine?
-	m := NewFileManager()
-	s, err := m.StoreFile(b, nameComponents[1])
-	if err != nil {
-		Logr.Error("Unable to store images", "task", taskID, "error", err.Error())
-		return
+		nameComponents := strings.Split(fh.Filename, ".")
+		if len(nameComponents) != 2 {
+			Logr.Error("Could not find the extension of the uploaded file", "error", err)
+			return
+		}
+
+		b, err := io.ReadAll(f)
+		if err != nil {
+			Logr.Error("could not read bytes out of file sent", "error", err)
+			return
+		}
+
+		//TODO: can the rest of the following be done in a go routine?
+		m := NewFileManager()
+		s, err := m.StoreFile(b, nameComponents[1])
+		if err != nil {
+			Logr.Error("Unable to store images", "task", taskID, "error", err.Error())
+			return
+		}
+
+		f.Close()
+		filePaths[i] = s
 	}
-	go saveTaskImages(taskID, []string{s})
+	go saveTaskImages(taskID, filePaths)
 }
 
 func viewTask(w http.ResponseWriter, r *http.Request) {
@@ -218,9 +226,10 @@ func displayTaskImages(w http.ResponseWriter, r *http.Request) {
 	if len(paths) == 0 {
 		return
 	}
+	//TODO: Move to a template so tailwind will find the css classes
 	content := ""
 	for _, p := range paths {
-		content += fmt.Sprintf(`<img onclick="enlargeModal()" class="h-32 w-32 cursor-pointer" src="%s" alt="task-image" width="128" height="128">`, p)
+		content += fmt.Sprintf(`<img onclick="enlargeModal()" class="h-32 w-32 mx-5 border-2 border-sky-900 cursor-pointer" src="%s" alt="task-image" width="128" height="128">`, p)
 	}
 	//This script is defiend in src/showTask.js, it adds a listener to each image
 	content += `<script src="/static/enlargeImages.js"></script>`
