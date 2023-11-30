@@ -9,21 +9,17 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	smithyendpoints "github.com/aws/smithy-go/endpoints"
+	"github.com/rs/xid"
 )
 
 type FileManager interface {
 	StoreFile(b []byte, ext string) (string, error)
 }
 
-//TODO: https://aws.github.io/aws-sdk-go-v2/docs/configuring-sdk/endpoints/
+// TODO: https://aws.github.io/aws-sdk-go-v2/docs/configuring-sdk/endpoints/
 type objectStorage struct {
-	//The region the bucket is within
-	region    string
-	accessKey string
-	secretKey string
 	//The URI for the Object Storage, can be AWS or otherwise
 	endpoint string
 	//The name of the bucket
@@ -33,25 +29,6 @@ type objectStorage struct {
 	cdn string
 	// The configuration setup to upload files to object storage
 	cfg *aws.Config
-}
-
-func (obs *objectStorage) getAWSConfig() error {
-	var c aws.Config
-	var err error
-	if obs.accessKey == "" {
-		c, err = config.LoadDefaultConfig(context.TODO())
-	} else {
-		c, err = config.LoadDefaultConfig(context.TODO(),
-			config.WithRegion(obs.region),
-			config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(obs.accessKey, obs.secretKey, "")),
-		)
-	}
-	if err != nil {
-		return &ControllerError{Msg: "unable to load default config for object storage", Func: "getAWSConfig", Reason: err.Error()}
-	}
-
-	obs.cfg = &c
-	return nil
 }
 
 type resolverV2 struct {
@@ -87,13 +64,31 @@ func (obs *objectStorage) getS3Client() (*s3.Client, error) {
 	}), nil
 }
 
-//TODO: Create a file name with xid or something or prefix it with the task number idk
-//createKeyName create a unique filename for uploading to object storage
 func createKeyName(fe string) string {
-	return fe
+	x := xid.New()
+	s := fmt.Sprintf("goodidea/task-img-%s.%s", x.String(), fe)
+	return s
+}
+
+func (obs *objectStorage) constructlURL(key string) string {
+	if obs.cdn != "" {
+		return fmt.Sprintf("%s/%s", obs.cdn, key)
+	}
+	u := "s3.amazonaws.com"
+	if obs.endpoint != "" {
+		u = obs.endpoint
+	}
+	return fmt.Sprintf("https://%s.%s/%s", obs.bucket, u, key)
 }
 
 func (obs *objectStorage) StoreFile(b []byte, ext string) (string, error) {
+	if obs.cfg == nil {
+		c, err := config.LoadDefaultConfig(context.Background())
+		if err != nil {
+			return "", &ControllerError{Msg: "unable to load default config for object storage", Func: "ObjectStoreFile", Reason: err.Error()}
+		}
+		obs.cfg = &c
+	}
 	objectKey := createKeyName(ext)
 
 	reader := bytes.NewReader(b)
@@ -103,12 +98,18 @@ func (obs *objectStorage) StoreFile(b []byte, ext string) (string, error) {
 		Body:   reader,
 	}
 
-	_, err := client.PutObject(context.TODO(), params)
+	client, err := obs.getS3Client()
+	if err != nil {
+		return "", err
+	}
+	_, err = client.PutObject(context.TODO(), params)
 	if err != nil {
 		fmt.Printf("Failed to upload object %s/%s, %s\n", obs.bucket, objectKey, err.Error())
 		return "", err
 	}
-	return "tmp", nil
+
+	imgURL := obs.constructlURL(objectKey)
+	return imgURL, nil
 }
 
 type localStorage struct {
@@ -137,8 +138,22 @@ func (ls *localStorage) StoreFile(b []byte, ext string) (string, error) {
 }
 
 func NewFileManager() FileManager {
-	fm := localStorage{
-		dirName: "static/img",
+	var fm FileManager
+	if os.Getenv("AWS_BUCKET") != "" {
+		fm = &objectStorage{
+			bucket:   os.Getenv("AWS_BUCKET"),
+			cdn:      os.Getenv("AWS_IMAGE_CDN"),
+			endpoint: os.Getenv("AWS_ENDPOINT"),
+		}
+	} else {
+		//TODO: Check if directory exists and if not try to create it
+		d := "static/img"
+		if os.Getenv("LOCAL_DIR") != "" {
+			d = os.Getenv("LOCAL_DIR")
+		}
+		fm = &localStorage{
+			dirName: d,
+		}
 	}
-	return &fm
+	return fm
 }
