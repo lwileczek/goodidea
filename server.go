@@ -15,7 +15,7 @@ import (
 var tmpl *template.Template
 
 func index(w http.ResponseWriter, r *http.Request) {
-	tsks, err := getAllTasks()
+	tsks, err := getAllTasks(25)
 	if err != nil {
 		Logr.Error("Could not get all tasks from db", err)
 	}
@@ -32,7 +32,7 @@ func listTasks(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var taskList []Task
 	if title == "" {
-		taskList, err = getAllTasks()
+		taskList, err = getAllTasks(35)
 	} else {
 		taskList, err = getSomeTasks(title)
 	}

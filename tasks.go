@@ -22,7 +22,7 @@ type Task struct {
 	Images      []string   `json:"images"` //paths to get all of the images associated with task
 }
 
-func getAllTasks() ([]Task, error) {
+func getAllTasks(limit int16) ([]Task, error) {
 	ctx := context.Background()
 	query := `SELECT
 	id,
@@ -36,6 +36,10 @@ WHERE
 	deleted_at IS NULL
 ORDER BY
 	score DESC`
+
+    if limit > 0 {
+        query += fmt.Sprintf("\nLIMIT %d", limit)
+    }
 
 	tasks := make([]Task, 0, 8)
 	rows, err := DB.Query(ctx, query)
