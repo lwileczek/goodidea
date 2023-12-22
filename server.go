@@ -12,16 +12,17 @@ import (
 	"github.com/gorilla/mux"
 )
 
+var tmpl *template.Template
+
 func index(w http.ResponseWriter, r *http.Request) {
 	tsks, err := getAllTasks()
 	if err != nil {
-		fmt.Println("Could not get all tasks from db", err)
+		Logr.Error("Could not get all tasks from db", err)
 	}
 
-	tmpl := template.Must(template.ParseGlob("templates/*.html"))
 	err = tmpl.ExecuteTemplate(w, "index.html", tsks)
 	if err != nil {
-		fmt.Println("Could not execute template", err)
+		Logr.Error("Could not execute template", err)
 	}
 }
 
@@ -40,27 +41,26 @@ func listTasks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tmpl := template.Must(template.ParseFiles("templates/list-tasks.html", "templates/task.html"))
-	err = tmpl.Execute(w, taskList)
+	err = tmpl.ExecuteTemplate(w, "list-tasks.html", taskList)
 	if err != nil {
-		fmt.Println("Could not execute template", err)
+		Logr.Error("Could not execute template", err)
 	}
 }
 
 func updateScore(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseUint(mux.Vars(r)["id"], 10, 64)
 	if err != nil {
-		fmt.Println("Could not parse id", err)
+		Logr.Error("Could not parse id", err)
 	}
 
 	err = r.ParseForm()
 	if err != nil {
-		fmt.Println("Error parsing form", err)
+		Logr.Error("Error parsing form", err)
 	}
 
 	score, err := updateTaskScore(uint32(id), r.FormValue(fmt.Sprintf("scorekeeper%d", id)) == "inc")
 	if err != nil {
-		fmt.Println("Could not update task score", err)
+		Logr.Error("Could not update task score", err)
 	}
 
 	fmt.Fprintf(w, fmt.Sprintf("%d", score))
@@ -72,7 +72,7 @@ func createTask(w http.ResponseWriter, r *http.Request) {
 	//TODO: MultipartReader to transform this to a steam
 	err := r.ParseMultipartForm(32 << 20) //32MB
 	if err != nil {
-		fmt.Println("Error parsing form", err)
+		Logr.Error("Error parsing form", err)
 	}
 
 	title := r.FormValue("title")
@@ -101,10 +101,9 @@ func createTask(w http.ResponseWriter, r *http.Request) {
 		Score: 0,
 	}
 
-	tmpl := template.Must(template.ParseFiles("templates/make-task.html", "templates/task.html"))
-	err = tmpl.Execute(w, task)
+	err = tmpl.ExecuteTemplate(w, "make-task.html", task)
 	if err != nil {
-		fmt.Println("Could not execute template", err)
+		Logr.Error("Could not execute template", err)
 	}
 
 	//Add any images which may have been sent along with the form data
@@ -147,7 +146,7 @@ func createTask(w http.ResponseWriter, r *http.Request) {
 func viewTask(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseUint(mux.Vars(r)["id"], 10, 64)
 	if err != nil {
-		fmt.Println("Could not parse id", err)
+		Logr.Error("Could not parse id", err)
 		fmt.Fprintf(w, "ERROR! Could not get task ID from request")
 		return
 	}
@@ -166,8 +165,7 @@ func viewTask(w http.ResponseWriter, r *http.Request) {
 
 	tsk.Comments = comments
 
-	tmpl := template.Must(template.ParseFiles("templates/show-task.html", "templates/header.html", "templates/meta.html", "templates/footer.html", "templates/comment.html"))
-	err = tmpl.Execute(w, tsk)
+	err = tmpl.ExecuteTemplate(w, "show-task.html", tsk)
 	if err != nil {
 		Logr.Error("could not render template for task", "taskID", id, "error", err)
 	}
@@ -203,8 +201,11 @@ func postComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tmpl := template.Must(template.ParseFiles("templates/make-comment.html", "templates/comment.html"))
-	err = tmpl.Execute(w, Comment{TaskID: uint32(id), User: pu, Content: r.FormValue("comments"), CreatedAt: time.Now()})
+	err = tmpl.ExecuteTemplate(
+		w,
+		"make-comment.html",
+        Comment{TaskID: uint32(id), User: pu, Content: r.FormValue("comments"), CreatedAt: time.Now()},
+    )
 	if err != nil {
 		Logr.Error("could not render template for new comment", "error", err)
 	}
@@ -242,6 +243,9 @@ func notFound(w http.ResponseWriter, r *http.Request) {
 }
 
 func NewServer() *mux.Router {
+	//Setup the templates so the endpoints work
+	tmpl = template.Must(template.ParseGlob("templates/*.html"))
+
 	mux := mux.NewRouter()
 	mux.HandleFunc("/", index).Methods("GET")
 	mux.HandleFunc("/prod", index).Methods("GET")
