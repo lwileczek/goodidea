@@ -204,8 +204,8 @@ func postComment(w http.ResponseWriter, r *http.Request) {
 	err = tmpl.ExecuteTemplate(
 		w,
 		"make-comment.html",
-        Comment{TaskID: uint32(id), User: pu, Content: r.FormValue("comments"), CreatedAt: time.Now()},
-    )
+		Comment{TaskID: uint32(id), User: pu, Content: r.FormValue("comments"), CreatedAt: time.Now()},
+	)
 	if err != nil {
 		Logr.Error("could not render template for new comment", "error", err)
 	}
