@@ -1,17 +1,18 @@
 package goodidea
 
 import (
-    "fmt"
-	"time"
-    "strings"
 	"context"
-    "net/http"
-    "crypto/rand"
+	"crypto/rand"
 	"crypto/sha512"
 	"encoding/hex"
-
+	"fmt"
+	"net/http"
+	"strings"
+	"time"
 	//"github.com/rs/xid"
 )
+
+//go:generate go run static_pages.go
 
 // users within the system
 //
@@ -32,105 +33,105 @@ type user struct {
 
 // sessions are for user logins
 type session struct {
-    //session IDs should be cryptographically secure
-	SessionID string    `json:"sessionId"`
-    //the user in question
-	UserID    string    `json:"userId" validate:"required,u20"`
-    //When the token was 
+	//session IDs should be cryptographically secure
+	SessionID string `json:"sessionId"`
+	//the user in question
+	UserID string `json:"userId" validate:"required,u20"`
+	//When the token was
 	CreatedAt time.Time `json:"createdAt"`
 }
 
 func handleSignUp(w http.ResponseWriter, r *http.Request) {
-    err := r.ParseForm()
+	err := r.ParseForm()
 	if err != nil {
 		Logr.Error("Error parsing sign-up form", "error", err)
 		fmt.Fprintf(w, "<p>Oops! Looks like the form wasn't submitted correctly</p>")
 		return
 	}
 
-    pw := strings.TrimSpace(r.FormValue("password"))
+	pw := strings.TrimSpace(r.FormValue("password"))
 	if pw == "" {
 		fmt.Fprintf(w, "<p>Oops! Looks like the no password was submitted</p>")
 		return
 	}
-    if  len(pw) < 12 {
+	if len(pw) < 12 {
 		fmt.Fprintf(w, "<p>Oops! Looks like the password is not long enough (<12)</p>")
 		return
-    }
-    u := strings.TrimSpace(r.FormValue("username"))
+	}
+	u := strings.TrimSpace(r.FormValue("username"))
 	if u != "" {
 		fmt.Fprintf(w, "<p>Oops! Looks like the no username was submitted</p>")
-        return
+		return
 	}
-    exists, err := checkNameExistence(u) 
-    if err != nil {
+	exists, err := checkNameExistence(u)
+	if err != nil {
 		Logr.Error("Error checking for username existence", "error", err)
 		fmt.Fprintf(w, "<p>Oops! Server error attempting to sign you up</p>")
 		return
-    }
-    if exists {
+	}
+	if exists {
 		fmt.Fprintf(w, "<p>Sorry, that username is already taken.</p>")
 		return
-    }
+	}
 
-    if err := createUser(u, pw); err != nil {
+	if err := createUser(u, pw); err != nil {
 		Logr.Error("Error checking for username existence", "error", err)
 		fmt.Fprintf(w, "<p>Oops! Server error attempting to sign you up</p>")
 		return
-    }
+	}
 
-    http.Redirect(w, r, "/login", http.StatusFound)
+	http.Redirect(w, r, "/login", http.StatusFound)
 }
 
 func createUser(name, passwd string) error {
-    s := generateRandomSalt()
-    p := hashPassword(passwd, s)
-    return insertUser(name, p, string(s))
+	s := generateRandomSalt()
+	p := hashPassword(passwd, s)
+	return insertUser(name, p, string(s))
 }
 
 func checkNameExistence(u string) (bool, error) {
-    ctx := context.TODO()
-    var exists bool
-    q := "SELECT EXISTS(SELECT 1 FROM users WHERE name= $1)"
-    if err := DB.QueryRow(ctx, q).Scan(&exists); err != nil {
-        Logr.Error("Unable to query the database for username", "name", u, "error", err)
-        return exists, err
-    }
-    return exists, nil
+	ctx := context.TODO()
+	var exists bool
+	q := "SELECT EXISTS(SELECT 1 FROM users WHERE name= $1)"
+	if err := DB.QueryRow(ctx, q).Scan(&exists); err != nil {
+		Logr.Error("Unable to query the database for username", "name", u, "error", err)
+		return exists, err
+	}
+	return exists, nil
 }
 
 //persistSession in-case of server reload
 func persistSession(s *session) error {
-    ctx := context.TODO()
-    q := "INSERT INTO sessions(session_id, user_id, created_at) VALUES ($1, $2, $3)"
+	ctx := context.TODO()
+	q := "INSERT INTO sessions(session_id, user_id, created_at) VALUES ($1, $2, $3)"
 	_, err := DB.Exec(ctx, q, s.SessionID, s.UserID, s.CreatedAt)
-    return err
+	return err
 }
 
 //Create a new user
 func insertUser(name, passwd, salt string) error {
-    ctx := context.TODO()
-    q := "INSERT INTO users(name, passwd, salt) VALUES ($1, $2, $3)"
+	ctx := context.TODO()
+	q := "INSERT INTO users(name, passwd, salt) VALUES ($1, $2, $3)"
 	_, err := DB.Exec(ctx, q, name, passwd, salt)
-    return err
+	return err
 }
 
 func createUserSession(u *user) (*session, error) {
-    b := make([]byte, 32)
+	b := make([]byte, 32)
 	_, err := rand.Read(b[:])
-    if err != nil {
-        return nil, err
-    }
+	if err != nil {
+		return nil, err
+	}
 
 	var sessionId = hex.EncodeToString(b)
-    fmt.Println(sessionId)
-    fmt.Println(len(sessionId))
+	fmt.Println(sessionId)
+	fmt.Println(len(sessionId))
 
-    return &session{
-        SessionID: sessionId,
-        UserID: u.ID,
-        CreatedAt: time.Now(),
-    }, nil
+	return &session{
+		SessionID: sessionId,
+		UserID:    u.ID,
+		CreatedAt: time.Now(),
+	}, nil
 }
 
 //getUser by username to check password in a loging
@@ -138,12 +139,11 @@ func getUser(name string) (u *user, err error) {
 	ctx := context.Background()
 	q := `SELECT id, salt, passwd FROM users WHERE name = $1`
 	if err := DB.QueryRow(ctx, q).Scan(&u.ID, &u.Salt, &u.Passwd); err != nil {
-        return u, err
+		return u, err
 	}
-    u.Name = name
-    return u, nil
+	u.Name = name
+	return u, nil
 }
-
 
 // Check if two passwords match
 func doPasswordsMatch(hashedPassword, currPassword string, salt []byte) bool {
@@ -181,4 +181,3 @@ func hashPassword(password string, salt []byte) string {
 
 	return hashedPasswordHex
 }
-

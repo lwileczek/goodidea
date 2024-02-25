@@ -18,4 +18,8 @@ app/kodata
 bootstrap
 main
 
+# Generated static pages
+pages
+
+# For testing files
 tmp

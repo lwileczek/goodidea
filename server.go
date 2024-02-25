@@ -257,8 +257,14 @@ func NewServer() *mux.Router {
 	mux.HandleFunc("/tasks/{id}/comments", postComment).Methods("POST")
 	mux.HandleFunc("/tasks/{id}/images", displayTaskImages).Methods("GET")
 
+    //static assets that are generated like CSS and JavaScript
 	s := http.StripPrefix("/static/", http.FileServer(http.Dir("./static/")))
 	mux.PathPrefix("/static/").Handler(s)
+
+    //serve static files from go generate 
+    mux.PathPrefix("/login").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        http.ServeFile(w, r, "./pages/login.html")
+    })
 
 	mux.NotFoundHandler = http.HandlerFunc(notFound)
 
