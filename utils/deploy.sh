@@ -22,6 +22,7 @@ BINARY_PATH=${RELEASE_PATH}/lambda
 
 deploy () {
     npm run build
+    go generate ./...
     GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build \
         -o bootstrap \
         -ldflags="-s -w" \
