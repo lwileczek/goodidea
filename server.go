@@ -171,6 +171,38 @@ func viewTask(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func markTaskComplete(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.ParseUint(mux.Vars(r)["id"], 10, 64)
+	if err != nil {
+		Logr.Error("Could not parse id", "error", err)
+		fmt.Fprintf(w, "ERROR! Could not get task ID from request")
+		return
+	}
+	if err := toggleStatus(uint32(id)); err != nil {
+		Logr.Error("Could not mark task complete", "error", err, "id", id)
+		fmt.Fprintf(w, "<p>ERROR! could not mark complete</p>")
+		return
+	}
+
+	tsk, err := getTasksByID(uint32(id))
+	if err != nil {
+		Logr.Error("could not get task by id", "taskID", id, "error", err)
+		fmt.Fprintf(w, "Error could not get a task with this ID")
+		return
+	}
+
+	t1 := template.New("status")
+	t1, err = t1.Parse("<p id='task-status' class='col-start-10'>Status: {{ if . }}Completed{{ else }}Incomplete{{end -}}</p>")
+	if err != nil {
+		panic(err)
+	}
+
+	if err = t1.Execute(w, tsk.Status); err != nil {
+		Logr.Error("Could not execute the template for marking a task complete", "taskID", id, "error", err)
+		fmt.Fprintf(w, "couldn't execute template")
+	}
+}
+
 func postComment(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseUint(mux.Vars(r)["id"], 10, 64)
 	if err != nil {
@@ -255,6 +287,7 @@ func NewServer() *mux.Router {
 	mux.HandleFunc("/tasks/{id}", viewTask).Methods("GET")
 	mux.HandleFunc("/tasks/{id}/score", updateScore).Methods("POST")
 	mux.HandleFunc("/tasks/{id}/comments", postComment).Methods("POST")
+	mux.HandleFunc("/tasks/{id}/complete", markTaskComplete).Methods("POST")
 	mux.HandleFunc("/tasks/{id}/images", displayTaskImages).Methods("GET")
 
 	//static assets that are generated like CSS and JavaScript

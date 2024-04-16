@@ -33,6 +33,7 @@ func getAllTasks(limit int16) ([]Task, error) {
 FROM
 	tasks
 WHERE
+    status = false AND
 	deleted_at IS NULL
 ORDER BY
 	score DESC`
@@ -159,4 +160,12 @@ func updateTaskScore(id uint32, inc bool) (int32, error) {
 	}
 
 	return score, nil
+}
+
+func toggleStatus(id uint32) error {
+	ctx := context.Background()
+	query := "UPDATE tasks SET status = NOT status WHERE id = $1"
+	_, err := DB.Exec(ctx, query, id)
+
+	return err
 }

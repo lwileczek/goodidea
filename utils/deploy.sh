@@ -29,7 +29,7 @@ deploy () {
         -tags lambda.norpc \
         $BINARY_PATH
 
-    zip -r function.zip bootstrap static templates
+    zip -r function.zip bootstrap static templates pages
 
     aws lambda update-function-code \
         --region $REGION \
