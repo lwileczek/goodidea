@@ -8,11 +8,19 @@
                 <h1 class="fontsemi-bold text-2xl mb-5">{{ .Title }}</h1>
                 <div class="text-sm grid gird-cols-10">
                     <p class="col-start-1">Requested: {{ .CreatedAt.Format "2006 Jan 02" -}}</p>
-                    <p class="col-start-10">Status: {{ if .Status }}Completed{{ else }}Incomplete{{end -}}</p>
+                    <p id="task-status" class="col-start-10">Status: {{ if .Status }}Completed{{ else }}Incomplete{{end -}}</p>
                 </div>
                 <hr>
                 <p class="text-lg mb-10">{{ .Body }}</p>
             </section>
+            <button
+              type="submit"
+              class="col-start-2 h-9 w-32 btn border cursor-pointer border-sky-300 text-slate-50 bg-sky-500 hover:bg-sky-500/75"
+              hx-post="/tasks/{{ .ID }}/complete"
+              hx-target="#task-status"
+            >
+                    Mark Complete
+            </button>
             <div id="imgs"class="flex col-start-2 col-span-4" hx-get="/tasks/{{ .ID }}/images" hx-trigger="load"></div>
             <section id="comment-container" class="col-start-2 col-span-4">
                 <div class="grid grid-cols-10">
