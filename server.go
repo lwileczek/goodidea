@@ -204,8 +204,8 @@ func postComment(w http.ResponseWriter, r *http.Request) {
 	err = tmpl.ExecuteTemplate(
 		w,
 		"make-comment.html",
-        Comment{TaskID: uint32(id), User: pu, Content: r.FormValue("comments"), CreatedAt: time.Now()},
-    )
+		Comment{TaskID: uint32(id), User: pu, Content: r.FormValue("comments"), CreatedAt: time.Now()},
+	)
 	if err != nil {
 		Logr.Error("could not render template for new comment", "error", err)
 	}
@@ -257,8 +257,18 @@ func NewServer() *mux.Router {
 	mux.HandleFunc("/tasks/{id}/comments", postComment).Methods("POST")
 	mux.HandleFunc("/tasks/{id}/images", displayTaskImages).Methods("GET")
 
+	//static assets that are generated like CSS and JavaScript
 	s := http.StripPrefix("/static/", http.FileServer(http.Dir("./static/")))
 	mux.PathPrefix("/static/").Handler(s)
+
+	//serve static files from go generate
+	mux.PathPrefix("/login").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./pages/login.html")
+	})
+	//serve static files from go generate
+	mux.PathPrefix("/signup").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./pages/signup.html")
+	})
 
 	mux.NotFoundHandler = http.HandlerFunc(notFound)
 

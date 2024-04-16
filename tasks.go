@@ -37,9 +37,9 @@ WHERE
 ORDER BY
 	score DESC`
 
-    if limit > 0 {
-        query += fmt.Sprintf("\nLIMIT %d", limit)
-    }
+	if limit > 0 {
+		query += fmt.Sprintf("\nLIMIT %d", limit)
+	}
 
 	tasks := make([]Task, 0, 8)
 	rows, err := DB.Query(ctx, query)
