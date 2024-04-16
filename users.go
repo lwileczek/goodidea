@@ -116,6 +116,8 @@ func insertUser(name, passwd, salt string) error {
 	return err
 }
 
+//createUserSession – Create a cryptographically secure 64 length string to use 
+//as a session ID
 func createUserSession(u *user) (*session, error) {
 	b := make([]byte, 32)
 	_, err := rand.Read(b[:])
@@ -124,9 +126,6 @@ func createUserSession(u *user) (*session, error) {
 	}
 
 	var sessionId = hex.EncodeToString(b)
-	fmt.Println(sessionId)
-	fmt.Println(len(sessionId))
-
 	return &session{
 		SessionID: sessionId,
 		UserID:    u.ID,
