@@ -100,7 +100,7 @@ func checkNameExistence(u string) (bool, error) {
 	return exists, nil
 }
 
-//persistSession in-case of server reload
+// persistSession in-case of server reload
 func persistSession(s *session) error {
 	ctx := context.TODO()
 	q := "INSERT INTO sessions(session_id, user_id, created_at) VALUES ($1, $2, $3)"
@@ -108,7 +108,7 @@ func persistSession(s *session) error {
 	return err
 }
 
-//Create a new user
+// Create a new user
 func insertUser(name, passwd, salt string) error {
 	ctx := context.TODO()
 	q := "INSERT INTO users(name, passwd, salt) VALUES ($1, $2, $3)"
@@ -116,8 +116,8 @@ func insertUser(name, passwd, salt string) error {
 	return err
 }
 
-//createUserSession – Create a cryptographically secure 64 length string to use 
-//as a session ID
+// createUserSession – Create a cryptographically secure 64 length string to use
+// as a session ID
 func createUserSession(u *user) (*session, error) {
 	b := make([]byte, 32)
 	_, err := rand.Read(b[:])
@@ -133,7 +133,7 @@ func createUserSession(u *user) (*session, error) {
 	}, nil
 }
 
-//getUser by username to check password in a loging
+// getUser by username to check password in a loging
 func getUser(name string) (u *user, err error) {
 	ctx := context.Background()
 	q := `SELECT id, salt, passwd FROM users WHERE name = $1`
