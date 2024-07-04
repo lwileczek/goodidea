@@ -1,6 +1,6 @@
 build:
 	mkdir -p static/img
-	npm run build
+	npm run build:prod
 	go generate ./...
 	go build -o server ./app/main.go 
 
