@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"log/slog"
 	"net/url"
 	"os"
 
@@ -123,13 +124,13 @@ func (ls *localStorage) StoreFile(b []byte, ext string) (string, error) {
 	}
 	f, err := os.CreateTemp(ls.dirName, fmt.Sprintf("idea-*.%s", ext))
 	if err != nil {
-		Logr.Error("Error Creating Local TMP file", "err", err.Error())
+		slog.Error("Error Creating Local TMP file", "err", err.Error())
 		return "", err
 	}
 	defer f.Close()
 	_, err = f.Write(b)
 	if err != nil {
-		Logr.Error("Error writing bytes to a temp file", "err", err.Error())
+		slog.Error("Error writing bytes to a temp file", "err", err.Error())
 		return "", err
 	}
 

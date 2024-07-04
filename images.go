@@ -2,6 +2,7 @@ package goodidea
 
 import (
 	"context"
+	"log/slog"
 
 	"github.com/jackc/pgx/v5"
 )
@@ -14,7 +15,7 @@ func saveTaskImages(i uint32, p []string) {
 	ctx := context.Background()
 	for _, pth := range p {
 		if _, err := DB.Exec(ctx, "INSERT INTO task_imgs(task_id, img_path) VALUES ($1, $2)", i, pth); err != nil {
-			Logr.Error("Unable to save image path record", "task", i, "imagePath", pth)
+			slog.Error("Unable to save image path record", "task", i, "imagePath", pth)
 		}
 	}
 }
@@ -42,7 +43,7 @@ func getTaskImages(i uint32) ([]string, error) {
 		var s string
 		err = rows.Scan(&s)
 		if err != nil {
-			Logr.Error("Unable to marshal image path response into string", "err", err.Error())
+			slog.Error("Unable to marshal image path response into string", "err", err.Error())
 			return imgs, err
 		}
 		imgs = append(imgs, s)
