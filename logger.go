@@ -7,10 +7,6 @@ import (
 	"os"
 )
 
-var (
-	Logr *slog.Logger
-)
-
 // ControllerError - An error with nested response
 type ControllerError struct {
 	//Msg is a string field to capture a custom error message
@@ -32,6 +28,19 @@ func (e *ControllerError) Error() string {
 }
 
 func SetupLogger() {
-	l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-	Logr = l
+	lvl := slog.LevelInfo
+	switch os.Getenv("LOG_LEVEL") {
+	case "error":
+		lvl = slog.LevelError
+	case "warn":
+		lvl = slog.LevelWarn
+	case "debug":
+		lvl = slog.LevelDebug
+	}
+
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: lvl,
+	}))
+
+	slog.SetDefault(logger)
 }

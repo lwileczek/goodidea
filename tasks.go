@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"log/slog"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -126,7 +127,7 @@ func getTasksByID(id uint32) (Task, error) {
 		&task.CompletedAt,
 		&task.CreatedAt,
 	); err != nil {
-		Logr.Error("Could not query task from DB", "err", err)
+		slog.Error("Could not query task from DB", "err", err)
 		return task, err
 	}
 	return task, nil
@@ -143,15 +144,12 @@ func addTask(title, details string) (uint32, error) {
 	return newID, nil
 }
 
-func updateTaskScore(id uint32, inc bool) (int32, error) {
+func updateTaskScore(id uint32, val int8) (int32, error) {
 	var score int32
 	ctx := context.Background()
-	var symbol = "-"
-	if inc {
-		symbol = "+"
-	}
-	query := fmt.Sprintf("UPDATE tasks SET score = score %s 1 WHERE id = $1", symbol)
-	if _, err := DB.Exec(ctx, query, id); err != nil {
+
+	query := "UPDATE tasks SET score = score + $2 WHERE id = $1"
+	if _, err := DB.Exec(ctx, query, id, val); err != nil {
 		return 0, err
 	}
 

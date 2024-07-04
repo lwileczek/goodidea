@@ -19,11 +19,7 @@ func init() {
 			log.Fatal("Unable to create a connection to the database", err)
 		}
 	}
-	//defer goodidea.DB.Close()
-
-	if goodidea.Logr == nil {
-		goodidea.SetupLogger()
-	}
+	goodidea.SetupLogger()
 
 	//Set up mux router
 	router := goodidea.NewServer()

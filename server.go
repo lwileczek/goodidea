@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"strings"
@@ -17,12 +18,12 @@ var tmpl *template.Template
 func index(w http.ResponseWriter, r *http.Request) {
 	tsks, err := getAllTasks(25)
 	if err != nil {
-		Logr.Error("Could not get all tasks from db", err)
+		slog.Error("Could not get all tasks from db", err)
 	}
 
 	err = tmpl.ExecuteTemplate(w, "index.html", tsks)
 	if err != nil {
-		Logr.Error("Could not execute template", err)
+		slog.Error("Could not execute template", err)
 	}
 }
 
@@ -37,30 +38,49 @@ func listTasks(w http.ResponseWriter, r *http.Request) {
 		taskList, err = getSomeTasks(title)
 	}
 	if err != nil {
-		Logr.Error("Could not get tasks from db", err)
+		slog.Error("Could not get tasks from db", err)
 		return
 	}
 
 	err = tmpl.ExecuteTemplate(w, "list-tasks.html", taskList)
 	if err != nil {
-		Logr.Error("Could not execute template", err)
+		slog.Error("Could not execute template", err)
 	}
 }
 
+// TODO: Handle errors and report them back to the UI
 func updateScore(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseUint(mux.Vars(r)["id"], 10, 64)
 	if err != nil {
-		Logr.Error("Could not parse id", err)
+		slog.Error("Could not parse id", "err", err)
+		return
 	}
 
 	err = r.ParseForm()
 	if err != nil {
-		Logr.Error("Error parsing form", err)
+		slog.Error("Error parsing form", "err", err)
+		return
 	}
 
-	score, err := updateTaskScore(uint32(id), r.FormValue(fmt.Sprintf("scorekeeper%d", id)) == "inc")
+	vote := r.FormValue(fmt.Sprintf("scorekeeper%d", id))
+	var val int8 = 0
+	switch vote {
+	case "inc":
+		val = 1
+	case "inc2":
+		val = 2
+	case "dec":
+		val = -1
+	case "dec2":
+		val = -2
+	default:
+		slog.Error("Did not understand the new vote value", "vote", vote)
+		return
+	}
+
+	score, err := updateTaskScore(uint32(id), val)
 	if err != nil {
-		Logr.Error("Could not update task score", err)
+		slog.Error("Could not update task score", err)
 	}
 
 	fmt.Fprintf(w, fmt.Sprintf("%d", score))
@@ -72,7 +92,7 @@ func createTask(w http.ResponseWriter, r *http.Request) {
 	//TODO: MultipartReader to transform this to a steam
 	err := r.ParseMultipartForm(32 << 20) //32MB
 	if err != nil {
-		Logr.Error("Error parsing form", err)
+		slog.Error("Error parsing form", err)
 	}
 
 	title := r.FormValue("title")
@@ -84,7 +104,7 @@ func createTask(w http.ResponseWriter, r *http.Request) {
 	body := r.FormValue("details")
 	taskID, err := addTask(title, body)
 	if err != nil {
-		Logr.Error("Could not create a new task", "error", err)
+		slog.Error("Could not create a new task", "error", err)
 		fmt.Fprintf(w, "<p>Could not create a new task</p>")
 		return
 	}
@@ -103,7 +123,7 @@ func createTask(w http.ResponseWriter, r *http.Request) {
 
 	err = tmpl.ExecuteTemplate(w, "make-task.html", task)
 	if err != nil {
-		Logr.Error("Could not execute template", err)
+		slog.Error("Could not execute template", err)
 	}
 
 	//Add any images which may have been sent along with the form data
@@ -119,13 +139,13 @@ func createTask(w http.ResponseWriter, r *http.Request) {
 
 		nameComponents := strings.Split(fh.Filename, ".")
 		if len(nameComponents) != 2 {
-			Logr.Error("Could not find the extension of the uploaded file", "error", err)
+			slog.Error("Could not find the extension of the uploaded file", "error", err)
 			return
 		}
 
 		b, err := io.ReadAll(f)
 		if err != nil {
-			Logr.Error("could not read bytes out of file sent", "error", err)
+			slog.Error("could not read bytes out of file sent", "error", err)
 			return
 		}
 
@@ -133,7 +153,7 @@ func createTask(w http.ResponseWriter, r *http.Request) {
 		m := NewFileManager()
 		s, err := m.StoreFile(b, nameComponents[1])
 		if err != nil {
-			Logr.Error("Unable to store images", "task", taskID, "error", err.Error())
+			slog.Error("Unable to store images", "task", taskID, "error", err.Error())
 			return
 		}
 
@@ -146,47 +166,47 @@ func createTask(w http.ResponseWriter, r *http.Request) {
 func viewTask(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseUint(mux.Vars(r)["id"], 10, 64)
 	if err != nil {
-		Logr.Error("Could not parse id", err)
+		slog.Error("Could not parse id", err)
 		fmt.Fprintf(w, "ERROR! Could not get task ID from request")
 		return
 	}
 	//TODO: Why not get all of the comments for the task in one query?
 	tsk, err := getTasksByID(uint32(id))
 	if err != nil {
-		Logr.Error("could not get task by id", "taskID", id, "error", err)
+		slog.Error("could not get task by id", "taskID", id, "error", err)
 		fmt.Fprintf(w, "Error could not get a task with this ID")
 		return
 	}
 
 	comments, err := getAllTaskComments(uint32(id))
 	if err != nil {
-		Logr.Error("could not get comments for task", "taskID", id, "error", err)
+		slog.Error("could not get comments for task", "taskID", id, "error", err)
 	}
 
 	tsk.Comments = comments
 
 	err = tmpl.ExecuteTemplate(w, "show-task.html", tsk)
 	if err != nil {
-		Logr.Error("could not render template for task", "taskID", id, "error", err)
+		slog.Error("could not render template for task", "taskID", id, "error", err)
 	}
 }
 
 func markTaskComplete(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseUint(mux.Vars(r)["id"], 10, 64)
 	if err != nil {
-		Logr.Error("Could not parse id", "error", err)
+		slog.Error("Could not parse id", "error", err)
 		fmt.Fprintf(w, "ERROR! Could not get task ID from request")
 		return
 	}
 	if err := toggleStatus(uint32(id)); err != nil {
-		Logr.Error("Could not mark task complete", "error", err, "id", id)
+		slog.Error("Could not mark task complete", "error", err, "id", id)
 		fmt.Fprintf(w, "<p>ERROR! could not mark complete</p>")
 		return
 	}
 
 	tsk, err := getTasksByID(uint32(id))
 	if err != nil {
-		Logr.Error("could not get task by id", "taskID", id, "error", err)
+		slog.Error("could not get task by id", "taskID", id, "error", err)
 		fmt.Fprintf(w, "Error could not get a task with this ID")
 		return
 	}
@@ -198,7 +218,7 @@ func markTaskComplete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err = t1.Execute(w, tsk.Status); err != nil {
-		Logr.Error("Could not execute the template for marking a task complete", "taskID", id, "error", err)
+		slog.Error("Could not execute the template for marking a task complete", "taskID", id, "error", err)
 		fmt.Fprintf(w, "couldn't execute template")
 	}
 }
@@ -206,14 +226,14 @@ func markTaskComplete(w http.ResponseWriter, r *http.Request) {
 func postComment(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseUint(mux.Vars(r)["id"], 10, 64)
 	if err != nil {
-		Logr.Error("Could not parse id", "error", err)
+		slog.Error("Could not parse id", "error", err)
 		fmt.Fprintf(w, "ERROR! Could not get task ID from request")
 		return
 	}
 
 	err = r.ParseForm()
 	if err != nil {
-		Logr.Error("Error parsing form", "error", err)
+		slog.Error("Error parsing form", "error", err)
 		fmt.Fprintf(w, "<p>ERROR! Could not pase the form data</p>")
 		return
 	}
@@ -228,7 +248,7 @@ func postComment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := addComment(uint32(id), pu, r.FormValue("comments")); err != nil {
-		Logr.Error("Could not save a new comment", "error", err)
+		slog.Error("Could not save a new comment", "error", err)
 		fmt.Fprintf(w, "<p>ERROR! could not insert the comment into the DB</p>")
 		return
 	}
@@ -239,20 +259,20 @@ func postComment(w http.ResponseWriter, r *http.Request) {
 		Comment{TaskID: uint32(id), User: pu, Content: r.FormValue("comments"), CreatedAt: time.Now()},
 	)
 	if err != nil {
-		Logr.Error("could not render template for new comment", "error", err)
+		slog.Error("could not render template for new comment", "error", err)
 	}
 }
 
 func displayTaskImages(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseUint(mux.Vars(r)["id"], 10, 64)
 	if err != nil {
-		Logr.Error("Could not parse id", "err", err)
+		slog.Error("Could not parse id", "err", err)
 		fmt.Fprintf(w, "ERROR! Could not get task ID from request")
 		return
 	}
 	paths, err := getTaskImages(uint32(id))
 	if err != nil {
-		Logr.Error("could not get image paths", "task", id, "err", err)
+		slog.Error("could not get image paths", "task", id, "err", err)
 		fmt.Fprintf(w, "ERROR! Could not get images for task %d", id)
 		return
 	}

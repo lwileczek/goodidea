@@ -6,6 +6,7 @@ import (
 	"crypto/sha512"
 	"encoding/hex"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strings"
 	"time"
@@ -44,7 +45,7 @@ type session struct {
 func handleSignUp(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
-		Logr.Error("Error parsing sign-up form", "error", err)
+		slog.Error("Error parsing sign-up form", "error", err)
 		fmt.Fprintf(w, "<p>Oops! Looks like the form wasn't submitted correctly</p>")
 		return
 	}
@@ -65,7 +66,7 @@ func handleSignUp(w http.ResponseWriter, r *http.Request) {
 	}
 	exists, err := checkNameExistence(u)
 	if err != nil {
-		Logr.Error("Error checking for username existence", "error", err)
+		slog.Error("Error checking for username existence", "error", err)
 		fmt.Fprintf(w, "<p>Oops! Server error attempting to sign you up</p>")
 		return
 	}
@@ -75,7 +76,7 @@ func handleSignUp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := createUser(u, pw); err != nil {
-		Logr.Error("Error checking for username existence", "error", err)
+		slog.Error("Error checking for username existence", "error", err)
 		fmt.Fprintf(w, "<p>Oops! Server error attempting to sign you up</p>")
 		return
 	}
@@ -94,7 +95,7 @@ func checkNameExistence(u string) (bool, error) {
 	var exists bool
 	q := "SELECT EXISTS(SELECT 1 FROM users WHERE name= $1)"
 	if err := DB.QueryRow(ctx, q).Scan(&exists); err != nil {
-		Logr.Error("Unable to query the database for username", "name", u, "error", err)
+		slog.Error("Unable to query the database for username", "name", u, "error", err)
 		return exists, err
 	}
 	return exists, nil
