@@ -20,7 +20,7 @@ const addImageListeners = () => {
 	}
 
 	const b = document.querySelector("#bigImg button");
-	b.onclick = function () {
+	b.onclick = () => {
 		const d = document.getElementById("bigImg");
 		d.close();
 	};

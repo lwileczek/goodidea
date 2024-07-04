@@ -10,7 +10,7 @@
     "build": "npm run build:css && npm run build:js",
     "build:prod": "npm run build:css && npm run build:js:prod",
     "lint": "npx @biomejs/biome lint ./src/*.js",
-    "fix": "npx @biomejs/biome check --apply ./src/*.js"
+    "fix": "npx @biomejs/biome check --write ./src/*.js"
   },
   "repository": {
     "type": "git",
