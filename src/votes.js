@@ -8,10 +8,38 @@ const setVoteListeners = () => {
 	for (let j = 0; j < radios.length; j++) {
 		const id = radios[j].id;
 		const voteInfo = id.split("-");
-		radios[j].onclick = function () {
-			setCookie(voteInfo[0], voteInfo[1], 1);
+		radios[j].onclick = () => {
+			radios[j].checked = true;
+			if (voteInfo.length > 1) {
+				setCookie(voteInfo[0], voteInfo[1], 60);
+
+				const changeDirection = voteInfo[1] === "up" ? "down" : "up";
+				updateVoteMagnitude(voteInfo[0], changeDirection);
+			}
 		};
 	}
+};
+
+/**
+ * @Function{updateVoteMagnitude}
+ * If we vote one direction, then change our mind, our vote needs to be twice
+ * as large. 1 to undo our last vote, and 1 to apply the directional vote we want
+ * @param{string} taskId - The task that was just voted on
+ * @param{string} direction - The direction which needs to be updated
+ */
+const updateVoteMagnitude = (taskId, direction) => {
+	const btn = document.getElementById(`${taskId}-${direction}`);
+	//If we cannot find it for some reason I guess we give up
+	if (!btn) {
+		return;
+	}
+
+	let newVal = "inc2";
+	if (direction === "down") {
+		newVal = "dec2";
+	}
+
+	btn.value = newVal;
 };
 
 /**
@@ -85,6 +113,13 @@ const applyPreviousVotes = () => {
 		//Could have a cookie for a task not shown
 		if (radio !== undefined && radio !== null) {
 			radio.checked = true;
+
+			//Input Ids look like taskId-[up|down]
+			const voteInfo = previousVotes[v].split("-");
+			if (voteInfo.length >= 2) {
+				const changeDirection = voteInfo[1] === "up" ? "down" : "up";
+				updateVoteMagnitude(voteInfo[0], changeDirection);
+			}
 		}
 	}
 };
